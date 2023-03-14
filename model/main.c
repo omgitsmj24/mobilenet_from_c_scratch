@@ -72,4 +72,16 @@ int main(int argc, char** argv) {
             }
         }
     }
+
+    // Print output for debugging
+    for (int oc = 0; oc < OUTPUT_CHANNEL; oc++) {
+        for (int oy = 0; oy < INPUT_HEIGHT; oy++) {
+            for (int ox = 0; ox < INPUT_WIDTH; ox++) {
+                printf("%f ", output[ox][oy][oc]);
+            }
+            printf(" ");
+        }
+
+    }
+    return 0;
 }
