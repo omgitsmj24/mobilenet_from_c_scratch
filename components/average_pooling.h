@@ -1,4 +1,6 @@
 #include "stdio.h"
+#include "math.h"
+#include "float.h"
 
 void avg_pool(float *input, float *output, int input_h, int input_w,
               int pool_h, int pool_w) {
