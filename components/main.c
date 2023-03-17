@@ -7,11 +7,11 @@
 //INPUT
 #define INPUT_WIDTH 4
 #define INPUT_HEIGHT 4
-#define INPUT_CHANNELS 1
+#define INPUT_CHANNELS 3
 
 //DEPTHWISE CONVOLUTION
 #define DEPTHWISE_FILTER_SIZE 2
-#define DEPTHWISE_FILTER_DEPTH 1
+#define DEPTHWISE_FILTER_DEPTH INPUT_CHANNELS
 #define DEPTHWISE_STRIDE 1
 #define DEPTHWISE_PADDING 0
 #define DEPTHWISE_NUM_FILTERS 3
@@ -83,14 +83,16 @@ void init_pointwise_kernel() {
 
 //Perform depthwise convolution
 void depthwise_conv2d() {
-    for (int l = 0; l < DEPTHWISE_NUM_FILTERS; l++) {
+    for (int l = 0; l < DEPTHWISE_NUM_FILTERS; l++){
         for (int k = 0; k < DEPTHWISE_FILTER_DEPTH; k++) {
             for (int i = 0; i < OUTPUT1_SIZE; i++) {
                 for (int j = 0; j < OUTPUT1_SIZE; j++) {
                     float sum = 0;
                     for (int m = 0; m < DEPTHWISE_FILTER_SIZE; m++) {
                         for (int n = 0; n < DEPTHWISE_FILTER_SIZE; n++) {
-                            sum += input[i * DEPTHWISE_STRIDE + m][j + n][k] * depthwise_kernel[m][n][k][l];
+                            int x = i * DEPTHWISE_STRIDE + m;
+                            int y = j * DEPTHWISE_STRIDE + n;
+                            sum += input[x][y][k] * depthwise_kernel[m][n][k][l];
                         }
                     }
                     output1[i][j][k][l] = sum;
@@ -103,17 +105,18 @@ void depthwise_conv2d() {
 void pointwise_conv2d(){
     for (int l = 0; l < POINTWISE_NUM_FILTERS; l++) {
         for (int k = 0; k < POINTWISE_FILTER_DEPTH; k++) {
-            for (int i = 0; i < OUTPUT2_SIZE; i++) {
-                for (int j = 0; j < OUTPUT2_SIZE; j++) {
-                    float sum = 0;
-                    for (int m = 0; m < POINTWISE_FILTER_SIZE; m++) {
-                        for (int n = 0; n < POINTWISE_FILTER_SIZE; n++) {
-                            sum += output1[i * POINTWISE_PADDING + m][j + n][k][l] * pointwise_kernel[m][n][k][l];
+            for (int o = 0; o < INPUT_CHANNELS; o)
+                for (int i = 0; i < OUTPUT2_SIZE; i++) {
+                    for (int j = 0; j < OUTPUT2_SIZE; j++) {
+                        float sum = 0;
+                        for (int m = 0; m < POINTWISE_FILTER_SIZE; m++) {
+                            for (int n = 0; n < POINTWISE_FILTER_SIZE; n++) {
+                                sum += output1[i * POINTWISE_STRIDE + m][j * POINTWISE_STRIDE + n][k][l] * pointwise_kernel[m][n][k][l];
+                            }
                         }
+                        output2[i][j][k][l] = sum;
                     }
-                    output2[i][j][k][l] = sum;
                 }
-            }
         }
     }
 }
