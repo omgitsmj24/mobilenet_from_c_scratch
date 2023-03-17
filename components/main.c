@@ -25,7 +25,7 @@
 #define POINTWISE_FILTER_SIZE 1
 #define POINTWISE_FILTER_DEPTH 3
 #define POINTWISE_STRIDE 1
-#define POINTWISE_NUM_FILTERS 3
+#define POINTWISE_NUM_FILTERS 8
 
 //OUTPUT2
 #define OUTPUT2_SIZE ((OUTPUT1_SIZE - POINTWISE_FILTER_SIZE) / POINTWISE_STRIDE + 1)
@@ -167,9 +167,10 @@ void print_output1() {
 // Print output2 tensor
 void print_output2() {
     printf("\nPOINTWISE OUTPUT: \n");
-    for (int l = 0; l < POINTWISE_FILTER_SIZE; l++) {
+    for (int l = 0; l < POINTWISE_NUM_FILTERS; l++) {
+        printf("Filter %d:\n", l);
         for (int k = 0; k < POINTWISE_FILTER_DEPTH; k++) {
-            printf("Filter %d:\n", k);
+            printf("Depth %d:\n", k);
             for (int i = 0; i < OUTPUT2_SIZE; i++) {
                 for (int j = 0; j < OUTPUT2_SIZE; j++) {
                     printf("%f ", output2[i][j][k][l]);
