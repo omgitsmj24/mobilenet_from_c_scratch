@@ -1,61 +1,75 @@
 #include <stdio.h>
-#include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
-#define INPUT_SIZE 5
-#define INPUT_DEPTH 3
-#define KERNEL_SIZE 2
-#define NUM_FILTERS 2
-#define STRIDE 1
+float* init_input_layer(int width, int height, int depth, int padding) {
+    // allocate memory for input layer without padding
+    float *input_layer = (float*)malloc(width * height * depth * sizeof(float));
+
+    // initialize input layer with random values between 0 and 1
+    srand(time(NULL));
+    for (int d = 0; d < depth; d++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                input_layer[d * width * height + i * height + j] = ((float) rand() / (RAND_MAX));
+            }
+        }
+    }
+
+    // allocate memory for input layer with padding
+    int padded_width = width + 2*padding;
+    int padded_height = height + 2*padding;
+    float *padded_input_layer = (float*)malloc(padded_width * padded_height * depth * sizeof(float));
+
+    // initialize padded input layer with zeros
+    for (int d = 0; d < depth; d++) {
+        for (int i = 0; i < padded_width; i++) {
+            for (int j = 0; j < padded_height; j++) {
+                padded_input_layer[d * padded_width * padded_height + i * padded_height + j] = 0.0f;
+            }
+        }
+    }
+
+    // copy input layer to padded input layer
+    for (int d = 0; d < depth; d++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                padded_input_layer[d * padded_width * padded_height + (i + padding) * padded_height + (j + padding)] = input_layer[d * width * height + i * height + j];
+            }
+        }
+    }
+
+    // free memory for input layer without padding
+    free(input_layer);
+
+    // return pointer to padded input layer
+    return padded_input_layer;
+}
 
 int main() {
-    // Define input and kernel arrays
-    float input[INPUT_SIZE][INPUT_SIZE][INPUT_DEPTH];
-    float kernel[KERNEL_SIZE][KERNEL_SIZE][INPUT_DEPTH][NUM_FILTERS];
+    int width = 5;
+    int height = 5;
+    int depth = 3;
+    int padding = 1;
 
-    // Initialize input and kernel arrays with random values
-    for (int i = 0; i < INPUT_SIZE; i++) {
-        for (int j = 0; j < INPUT_SIZE; j++) {
-            for (int k = 0; k < INPUT_DEPTH; k++) {
-                input[i][j][k] = (float)rand()/(float)(RAND_MAX/10.0);
-                for (int l = 0; l < NUM_FILTERS; l++) {
-                    kernel[i][j][k][l] = (float)rand()/(float)(RAND_MAX/10.0);
-                }
-            }
-        }
-    }
+    // initialize input layer with random values and padding
+    float* padded_input_layer = init_input_layer(width, height, depth, padding);
 
-    // Perform depthwise convolution
-    int output_size = (INPUT_SIZE - KERNEL_SIZE) / STRIDE + 1;
-    float output[output_size][output_size][INPUT_DEPTH * NUM_FILTERS];
-    for (int i = 0; i < output_size; i++) {
-        for (int j = 0; j < output_size; j++) {
-            for (int k = 0; k < INPUT_DEPTH; k++) {
-                for (int l = 0; l < NUM_FILTERS; l++) {
-                    float sum = 0.0;
-                    for (int m = 0; m < KERNEL_SIZE; m++) {
-                        for (int n = 0; n < KERNEL_SIZE; n++) {
-                            int x = i * STRIDE + m;
-                            int y = j * STRIDE + n;
-                            sum += input[x][y][k] * kernel[m][n][k][l];
-                        }
-                    }
-                    output[i][j][k * NUM_FILTERS + l] = sum;
-                }
-            }
-        }
-    }
-
-    // Print output
-    for (int i = 0; i < output_size; i++) {
-        for (int j = 0; j < output_size; j++) {
-            for (int k = 0; k < INPUT_DEPTH * NUM_FILTERS; k++) {
-                printf("%.2f ", output[i][j][k]);
+    // print padded input layer
+    printf("Padded input layer:\n");
+    for (int d = 0; d < depth; d++) {
+        printf("Channel %d:\n", d);
+        for (int i = 0; i < width + 2*padding; i++) {
+            for (int j = 0; j < height + 2*padding; j++) {
+                printf("%f ", padded_input_layer[d * (width + 2*padding) * (height + 2*padding) + i * (height + 2*padding) + j]);
             }
             printf("\n");
         }
         printf("\n");
     }
+
+    // free memory for padded input layer
+    free(padded_input_layer);
 
     return 0;
 }

@@ -1,73 +1,44 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define IN_HEIGHT 5
-#define IN_WIDTH 5
-#define IN_CHANNELS 3
-#define DW_FILTER_SIZE 2
-#define NUM_FILTERS 2
-#define PW_FILTER_SIZE 1
-#define OUT_HEIGHT IN_HEIGHT
-#define OUT_WIDTH IN_WIDTH
-#define OUT_CHANNELS NUM_FILTERS
-
-float in[IN_HEIGHT][IN_WIDTH][IN_CHANNELS] = {{{0}}};
-float dw_filter[DW_FILTER_SIZE][DW_FILTER_SIZE][IN_CHANNELS][NUM_FILTERS] = {{{{0}}}};
-float pw_filter[PW_FILTER_SIZE][PW_FILTER_SIZE][IN_CHANNELS*NUM_FILTERS][OUT_CHANNELS] = {{{{0}}}};
-float out[OUT_HEIGHT][OUT_WIDTH][OUT_CHANNELS] = {{{0}}};
-
-void depthwise_conv2d(float in[IN_HEIGHT][IN_WIDTH][IN_CHANNELS], 
-                      float dw_filter[DW_FILTER_SIZE][DW_FILTER_SIZE][IN_CHANNELS][NUM_FILTERS], 
-                      float out[OUT_HEIGHT][OUT_WIDTH][OUT_CHANNELS])
-{
-    int i, j, k, l, m, n;
-
-    // Depthwise convolution
-    for (i = 0; i < OUT_HEIGHT; i++) {
-        for (j = 0; j < OUT_WIDTH; j++) {
-            for (k = 0; k < IN_CHANNELS; k++) {
-                for (l = 0; l < DW_FILTER_SIZE; l++) {
-                    for (m = 0; m < DW_FILTER_SIZE; m++) {
-                        for (n = 0; n < NUM_FILTERS; n++) {
-                            out[i][j][k*NUM_FILTERS+n] += 
-                                in[i+l][j+m][k] * dw_filter[l][m][k][n];
-                        }
-                    }
-                }
-            }
+// Function to add zero padding to a 2D input array
+// 'input' is the input array to be padded
+// 'input_rows' and 'input_cols' are the dimensions of the input array
+// 'pad_rows' and 'pad_cols' are the number of rows and columns to be added as padding
+// 'pad_top', 'pad_left', 'pad_bottom', and 'pad_right' specify the position of the padding
+// Returns a new 2D array with the zero-padded input
+float** zero_pad(float** input, int input_rows, int input_cols, int pad_rows, int pad_cols, int pad_top, int pad_left, int pad_bottom, int pad_right) {
+    int padded_rows = input_rows + pad_top + pad_bottom;
+    int padded_cols = input_cols + pad_left + pad_right;
+    float** padded_input = (float**) malloc(padded_rows * sizeof(float*));
+    for (int i = 0; i < padded_rows; i++) {
+        padded_input[i] = (float*) malloc(padded_cols * sizeof(float));
+        memset(padded_input[i], 0, padded_cols * sizeof(float));
+    }
+    for (int i = pad_top; i < padded_rows - pad_bottom; i++) {
+        for (int j = pad_left; j < padded_cols - pad_right; j++) {
+            padded_input[i][j] = input[i - pad_top][j - pad_left];
         }
     }
-
-    // Pointwise convolution
-    for (i = 0; i < OUT_HEIGHT; i++) {
-        for (j = 0; j < OUT_WIDTH; j++) {
-            for (k = 0; k < OUT_CHANNELS; k++) {
-                for (l = 0; l < IN_CHANNELS*NUM_FILTERS; l++) {
-                    out[i][j][k] += in[i][j][l] * pw_filter[0][0][l][k];
-                }
-            }
-        }
-    }
+    return padded_input;
 }
 
-int main()
-{
-    // Initialize input, depthwise filter, and pointwise filter
-    // ...
-
-    // Perform depthwise separable convolution 2D
-    depthwise_conv2d(in, dw_filter, out);
-
-    // Print output
-    int i, j, k;
-    for (i = 0; i < OUT_HEIGHT; i++) {
-        for (j = 0; j < OUT_WIDTH; j++) {
-            for (k = 0; k < OUT_CHANNELS; k++) {
-                printf("%f ", out[i][j][k]);
-            }
-            printf("\n");
+// Example usage
+int main() {
+    float** input = (float**) malloc(3 * sizeof(float*));
+    for (int i = 0; i < 3; i++) {
+        input[i] = (float*) malloc(3 * sizeof(float));
+        for (int j = 0; j < 3; j++) {
+            input[i][j] = i + j;
+        }
+    }
+    float** padded_input = zero_pad(input, 3, 3, 1, 1, 1, 1, 1, 1);
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            printf("%f ", padded_input[i][j]);
         }
         printf("\n");
     }
-
     return 0;
 }
