@@ -8,6 +8,6 @@
  * It tells the compiler that the function exists somewhere.
  */
 
-float inputlayer();
+void init_input(float input[5][5][3], int input_size, int intput_channels);
 
 #endif 

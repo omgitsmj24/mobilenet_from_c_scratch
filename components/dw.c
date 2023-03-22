@@ -1,6 +1,11 @@
 #include "dw.h"
 #include <stdio.h>
 
+#define INPUT_ROWS 224
+#define INPUT_COLS 224
+#define KERNEL_ROWS 3
+#define KERNEL_COLS 3
+
 void depthwise_conv(float *input, float *output, float *kernel, int input_h,
                     int input_w, int kernel_h, int kernel_w) {
 

@@ -3,24 +3,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define WIDTH 224
-#define HEIGHT 224
-#define CHANNELS 3
-
-void inputlayer() {
-    float input[WIDTH][HEIGHT][CHANNELS];
-
-    // Initialize input layer
-
-    for (int i = 0; i < WIDTH; i++) {
-        for (int j = 0; j < HEIGHT; j++) {
-            for (int k = 0; k < CHANNELS; k++) {
-                input[i][j][k] = (float)rand() / (float)RAND_MAX;
+void init_input(float input[5][5][3], int input_size, int intput_channels) {
+    // Initialize input tensor with random values
+    for (int d = 0; d < intput_channels; d++) {
+        for (int i = 0 ; i < input_size; i++) {
+            for (int j = 0; j < input_size; j++) {
+                input[i][j][d] = rand() % 10 - 2;
             }
         }
     }
-    printf("Input layer: \n");
-    printf("Channel 1: %f\n", input[0][0][0]);
-    printf("Channel 2: %f\n", input[0][0][1]);
-    printf("Channel 3: %f\n", input[0][0][2]);
 }

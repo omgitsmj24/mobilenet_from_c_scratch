@@ -14,6 +14,7 @@
 #define CONV2D_STRIDE 2
 #define CONV2D_PADDING 1
 #define CONV2D_NUM_FILTERS 3
+#define CONV2D_BIAS_SIZE 3
 
 //OUTPUT
 #define OUTPUT_SIZE ((INPUT_SIZE - CONV2D_FILTER_SIZE) / CONV2D_STRIDE + 1)
@@ -168,7 +169,7 @@ void depthwise_conv2d() {
                     for (int n = 0; n < DEPTHWISE_FILTER_SIZE; n++) {
                         int x = i * DEPTHWISE_STRIDE + m;
                         int y = j * DEPTHWISE_STRIDE + n;
-                        sum += output[x][y][k][l] * depthwise_kernel[m][n][k];
+                        sum += output[x][y][k] * depthwise_kernel[m][n][k];
                     }
                 }
                 output1[i][j][k] = sum;
