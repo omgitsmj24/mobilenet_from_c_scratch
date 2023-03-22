@@ -1,0 +1,2 @@
+model_checkpoint_path: "/export/hda3/mobilenet-oss/v3-large-minimalistic_224_1.0_uint8/ema/model-3868848"
+all_model_checkpoint_paths: "/export/hda3/mobilenet-oss/v3-large-minimalistic_224_1.0_uint8/ema/model-3868848"
