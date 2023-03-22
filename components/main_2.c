@@ -371,6 +371,37 @@ int depthwiseconv2d_11_output[14][14][672];
 #define pointwiseconv2d_11_output_size ((depthwiseconv2d_11_output_size - pointwiseconv2d_11_kernel_size + 2 * pointwiseconv2d_11_kernel_padding) / pointwiseconv2d_11_kernel_stride + 1)
 int pointwiseconv2d_11_output[14][14][112];
 
+//Add_8 14x14x112
+#define add_8_output_size 14
+#define add_8_output_channels 112
+int add_8_output[14][14][112];
+
+//Conv2d_12 14x14x672
+#define conv2d_12_kernel_size 1
+#define conv2d_12_kernel_channels 112
+#define conv2d_12_kernel_num 672
+#define conv2d_12_kernel_stride 1
+#define conv2d_12_kernel_padding 0
+#define conv2d_12_output_size ((add_8_output_size - conv2d_12_kernel_size + 2 * conv2d_12_kernel_padding) / conv2d_12_kernel_stride + 1)
+int conv2d_12_output[14][14][672];
+
+//DepthwiseConv2d_12 7x7x672
+#define depthwiseconv2d_12_kernel_size 3
+#define depthwiseconv2d_12_kernel_channels 672
+#define depthwiseconv2d_12_kernel_num 1
+#define depthwiseconv2d_12_kernel_stride 2
+#define depthwiseconv2d_12_kernel_padding (1.0/2.0)
+#define depthwiseconv2d_12_output_size ((conv2d_12_output_size - depthwiseconv2d_12_kernel_size + 2 * depthwiseconv2d_12_kernel_padding) / depthwiseconv2d_12_kernel_stride + 1)
+int depthwiseconv2d_12_output[7][7][672];
+
+//PointwiseConv2d_12 7x7x160
+#define pointwiseconv2d_12_kernel_size 1
+#define pointwiseconv2d_12_kernel_channels 672
+#define pointwiseconv2d_12_kernel_num 160
+#define pointwiseconv2d_12_kernel_stride 1
+#define pointwiseconv2d_12_kernel_padding 0
+#define pointwiseconv2d_12_output_size ((depthwiseconv2d_12_output_size - pointwiseconv2d_12_kernel_size + 2 * pointwiseconv2d_12_kernel_padding) / pointwiseconv2d_12_kernel_stride + 1)
+int pointwiseconv2d_12_output[7][7][160];
 
 void init_input() {
     for (int k = 0; k < input_channels; k++){
@@ -2102,9 +2133,249 @@ void pointwiseconv2d_10(){
 }
 
 void conv2d_11(){
-    
+    int conv2d_11_kernel[conv2d_11_kernel_size][conv2d_11_kernel_size][conv2d_11_kernel_channels][conv2d_11_kernel_num];
+    int conv2d_11_bias[conv2d_11_kernel_num];
+    for (int k = 0; k < conv2d_11_kernel_num; k++){
+        // printf("Kernel %d \n", k);
+        for(int i = 0; i < conv2d_11_kernel_size; i++){
+            for(int j = 0; j < conv2d_11_kernel_size; j++){
+                for(int l = 0; l < conv2d_11_kernel_channels; l++){
+                    conv2d_11_kernel[i][j][l][k] = rand() % 5 - 2;
+                    // printf("%f ", conv2d_11_kernel[i][j][l][k]);
+                }
+                // printf("\n");
+            }
+            // printf("\n");
+        }
+    }
+    //Initialize bias
+    for(int k = 0; k < conv2d_11_kernel_num; k++){
+        conv2d_11_bias[k] = rand() % 5 - 2;
+        // printf("%f ", conv2d_11_bias[k]);
+    }
+    //Perform conv2d_11
+    for(int k = 0; k < conv2d_11_kernel_num; k++){
+        for(int i = 0; i < conv2d_11_output_size; i++){
+            for(int j = 0; j < conv2d_11_output_size; j++){
+                conv2d_11_output[i][j][k] = 0;
+                for(int l = 0; l < conv2d_11_kernel_size; l++){
+                    for(int m = 0; m < conv2d_11_kernel_size; m++){
+                        for(int n = 0; n < conv2d_11_kernel_channels; n++){
+                            conv2d_11_output[i][j][k] += pointwiseconv2d_10_output[i + l][j + m][n] * conv2d_11_kernel[l][m][n][k];
+                        }
+                    }
+                }
+                conv2d_11_output[i][j][k] += conv2d_11_bias[k];
+            }
+        }
+    }
+    printf("Size of conv2d_11_output: %d x %d x %d \n", LEN(conv2d_11_output), LEN(conv2d_11_output[0]), LEN(conv2d_11_output[0][0]));
 }
 
+void depthwiseconv2d_11(){
+    int depthwiseconv2d_11_kernel[depthwiseconv2d_11_kernel_size][depthwiseconv2d_11_kernel_size][depthwiseconv2d_11_kernel_channels];
+    int depthwiseconv2d_11_bias[depthwiseconv2d_11_kernel_channels];
+    for (int k = 0; k < depthwiseconv2d_11_kernel_channels; k++){
+        // printf("Kernel %d \n", k);
+        for(int i = 0; i < depthwiseconv2d_11_kernel_size; i++){
+            for(int j = 0; j < depthwiseconv2d_11_kernel_size; j++){
+                depthwiseconv2d_11_kernel[i][j][k] = rand() % 5 - 2;
+                // printf("%f ", depthwiseconv2d_11_kernel[i][j][k]);
+            }
+            // printf("\n");
+        }
+    }
+    //Initialize bias
+    for(int k = 0; k < depthwiseconv2d_11_kernel_channels; k++){
+        depthwiseconv2d_11_bias[k] = rand() % 5 - 2;
+        // printf("%f ", depthwiseconv2d_11_bias[k]);
+    }
+
+    //Determine the padded conv2d_11_output size
+    int conv2d_11_output_padded_size = conv2d_11_output_size + depthwiseconv2d_11_kernel_padding * 2;
+    int conv2d_11_output_padded[conv2d_11_output_padded_size][conv2d_11_output_padded_size][depthwiseconv2d_11_kernel_channels];
+
+    //Copy conv2d_11_output to conv2d_11_output_padded
+    for(int k = 0; k < depthwiseconv2d_11_kernel_channels; k++){
+        for(int i = 1; i < conv2d_11_output_size - 1; i++){
+            for(int j = 1; j < conv2d_11_output_size - 1; j++){
+                conv2d_11_output_padded[i][j][k] = conv2d_11_output[i][j][k];
+            }
+        }
+    }
+
+    printf("Size of conv2d_11_output_padded: %d x %d x %d \n", LEN(conv2d_11_output_padded), LEN(conv2d_11_output_padded[0]), LEN(conv2d_11_output_padded[0][0]));
+
+    //Perform depthwiseconv2d_11
+    for(int k = 0; k < depthwiseconv2d_11_kernel_channels; k++){
+        for(int i = 0; i < depthwiseconv2d_11_output_size; i++){
+            for(int j = 0; j < depthwiseconv2d_11_output_size; j++){
+                depthwiseconv2d_11_output[i][j][k] = 0;
+                for(int l = 0; l < depthwiseconv2d_11_kernel_size; l++){
+                    for(int m = 0; m < depthwiseconv2d_11_kernel_size; m++){
+                        depthwiseconv2d_11_output[i][j][k] += conv2d_11_output_padded[i + l][j + m][k] * depthwiseconv2d_11_kernel[l][m][k];
+                    }
+                }
+                depthwiseconv2d_11_output[i][j][k] += depthwiseconv2d_11_bias[k];
+            }
+        }
+    }
+
+    printf("Size of depthwiseconv2d_11_output: %d x %d x %d \n", LEN(depthwiseconv2d_11_output), LEN(depthwiseconv2d_11_output[0]), LEN(depthwiseconv2d_11_output[0][0]));
+}
+
+void pointwiseconv2d_11(){
+    int pointwiseconv2d_11_kernel[pointwiseconv2d_11_kernel_size][pointwiseconv2d_11_kernel_size][pointwiseconv2d_11_kernel_channels][pointwiseconv2d_11_kernel_num];
+    int pointwiseconv2d_11_bias[pointwiseconv2d_11_kernel_num];
+    for (int k = 0; k < pointwiseconv2d_11_kernel_num; k++){
+        // printf("Kernel %d \n", k);
+        for(int i = 0; i < pointwiseconv2d_11_kernel_size; i++){
+            for(int j = 0; j < pointwiseconv2d_11_kernel_size; j++){
+                for(int l = 0; l < pointwiseconv2d_11_kernel_channels; l++){
+                    pointwiseconv2d_11_kernel[i][j][l][k] = rand() % 5 - 2;
+                    // printf("%f ", pointwiseconv2d_11_kernel[i][j][l][k]);
+                }
+                // printf("\n");
+            }
+            // printf("\n");
+        }
+    }
+    //Initialize bias
+    for(int k = 0; k < pointwiseconv2d_11_kernel_num; k++){
+        pointwiseconv2d_11_bias[k] = rand() % 5 - 2;
+        // printf("%f ", pointwiseconv2d_11_bias[k]);
+    }
+    //Perform pointwiseconv2d_11
+    for(int k = 0; k < pointwiseconv2d_11_kernel_num; k++){
+        for(int i = 0; i < pointwiseconv2d_11_output_size; i++){
+            for(int j = 0; j < pointwiseconv2d_11_output_size; j++){
+                pointwiseconv2d_11_output[i][j][k] = 0;
+                for(int l = 0; l < pointwiseconv2d_11_kernel_size; l++){
+                    for(int m = 0; m < pointwiseconv2d_11_kernel_size; m++){
+                        for(int n = 0; n < pointwiseconv2d_11_kernel_channels; n++){
+                            pointwiseconv2d_11_output[i][j][k] += depthwiseconv2d_11_output[i + l][j + m][n] * pointwiseconv2d_11_kernel[l][m][n][k];
+                        }
+                    }
+                }
+                pointwiseconv2d_11_output[i][j][k] += pointwiseconv2d_11_bias[k];
+            }
+        }
+    }
+    printf("Size of pointwiseconv2d_11_output: %d x %d x %d \n", LEN(pointwiseconv2d_11_output), LEN(pointwiseconv2d_11_output[0]), LEN(pointwiseconv2d_11_output[0][0]));
+}
+
+void add_8(){
+    //Perform add_8
+    for(int k = 0; k < add_8_output_channels; k++){
+        for(int i = 0; i < add_8_output_size; i++){
+            for(int j = 0; j < add_8_output_size; j++){
+                add_8_output[i][j][k] = pointwiseconv2d_11_output[i][j][k] + pointwiseconv2d_10_output[i][j][k];
+            }
+        }
+    }
+    printf("Size of add_8_output: %d x %d x %d \n", LEN(add_8_output), LEN(add_8_output[0]), LEN(add_8_output[0][0]));
+}
+
+void conv2d_12(){
+    int conv2d_12_kernel[conv2d_12_kernel_size][conv2d_12_kernel_size][conv2d_12_kernel_channels][conv2d_12_kernel_num];
+    int conv2d_12_bias[conv2d_12_kernel_num];
+    for (int k = 0; k < conv2d_12_kernel_num; k++){
+        // printf("Kernel %d \n", k);
+        for(int i = 0; i < conv2d_12_kernel_size; i++){
+            for(int j = 0; j < conv2d_12_kernel_size; j++){
+                for(int l = 0; l < conv2d_12_kernel_channels; l++){
+                    conv2d_12_kernel[i][j][l][k] = rand() % 5 - 2;
+                    // printf("%f ", conv2d_12_kernel[i][j][l][k]);
+                }
+                // printf("\n");
+            }
+            // printf("\n");
+        }
+    }
+    //Initialize bias
+    for(int k = 0; k < conv2d_12_kernel_num; k++){
+        conv2d_12_bias[k] = rand() % 5 - 2;
+        // printf("%f ", conv2d_12_bias[k]);
+    }
+    //Perform conv2d_12
+    for(int k = 0; k < conv2d_12_kernel_num; k++){
+        for(int i = 0; i < conv2d_12_output_size; i++){
+            for(int j = 0; j < conv2d_12_output_size; j++){
+                conv2d_12_output[i][j][k] = 0;
+                for(int l = 0; l < conv2d_12_kernel_size; l++){
+                    for(int m = 0; m < conv2d_12_kernel_size; m++){
+                        for(int n = 0; n < conv2d_12_kernel_channels; n++){
+                            conv2d_12_output[i][j][k] += add_8_output[i + l][j + m][n] * conv2d_12_kernel[l][m][n][k];
+                        }
+                    }
+                }
+                conv2d_12_output[i][j][k] += conv2d_12_bias[k];
+            }
+        }
+    }
+    printf("Size of conv2d_12_output: %d x %d x %d \n", LEN(conv2d_12_output), LEN(conv2d_12_output[0]), LEN(conv2d_12_output[0][0]));
+}
+
+void depthwiseconv2d_12(){
+    int depthwiseconv2d_12_kernel[depthwiseconv2d_12_kernel_size][depthwiseconv2d_12_kernel_size][depthwiseconv2d_12_kernel_channels];
+    int depthwiseconv2d_12_bias[depthwiseconv2d_12_kernel_channels];
+    for (int k = 0; k < depthwiseconv2d_12_kernel_channels; k++){
+        // printf("Kernel %d \n", k);
+        for(int i = 0; i < depthwiseconv2d_12_kernel_size; i++){
+            for(int j = 0; j < depthwiseconv2d_12_kernel_size; j++){
+                depthwiseconv2d_12_kernel[i][j][k] = rand() % 5 - 2;
+                // printf("%f ", depthwiseconv2d_12_kernel[i][j][k]);
+            }
+            // printf("\n");
+        }
+    }
+    //Initialize bias
+    for(int k = 0; k < depthwiseconv2d_12_kernel_channels; k++){
+        depthwiseconv2d_12_bias[k] = rand() % 5 - 2;
+        // printf("%f ", depthwiseconv2d_12_bias[k]);
+    }
+
+    //Determine padded conv2d_12_output size
+    int conv2d_12_output_padded_size = conv2d_12_output_size + depthwiseconv2d_12_kernel_padding * 2;
+    int conv2d_12_output_padded[conv2d_12_output_padded_size][conv2d_12_output_padded_size][conv2d_12_kernel_num];
+
+    //Initialize conv2d_12_output_padded with 0
+    for(int k = 0; k < conv2d_12_kernel_num; k++){
+        for(int i = 0; i < conv2d_12_output_padded_size; i++){
+            for(int j = 0; j < conv2d_12_output_padded_size; j++){
+                conv2d_12_output_padded[i][j][k] = 0;
+            }
+        }
+    }
+    //Copy conv2d_12_output to conv2d_12_output_padded
+    for(int k = 0; k < conv2d_12_kernel_num; k++){
+        for(int i = 0; i < conv2d_12_output_size; i++){
+            for(int j = 0; j < conv2d_12_output_size; j++){
+                conv2d_12_output_padded[i][j][k] = conv2d_12_output[i][j][k];
+            }
+        }
+    }
+    printf("Size of conv2d_12_output_padded: %d x %d x %d \n", LEN(conv2d_12_output_padded), LEN(conv2d_12_output_padded[0]), LEN(conv2d_12_output_padded[0][0]));
+    //Perform depthwiseconv2d_12
+    for(int k = 0; k < depthwiseconv2d_12_kernel_channels; k++){
+        for(int i = 0; i < depthwiseconv2d_12_output_size; i++){
+            for(int j = 0; j < depthwiseconv2d_12_output_size; j++){
+                depthwiseconv2d_12_output[i][j][k] = 0;
+                for(int l = 0; l < depthwiseconv2d_12_kernel_size; l++){
+                    for(int m = 0; m < depthwiseconv2d_12_kernel_size; m++){
+                        depthwiseconv2d_12_output[i][j][k] += conv2d_12_output_padded[i + l][j + m][k] * depthwiseconv2d_12_kernel[l][m][k];
+                    }
+                }
+                depthwiseconv2d_12_output[i][j][k] += depthwiseconv2d_12_bias[k];
+            }
+        }
+    }
+    printf("Size of depthwiseconv2d_12_output: %d x %d x %d \n", LEN(depthwiseconv2d_12_output), LEN(depthwiseconv2d_12_output[0]), LEN(depthwiseconv2d_12_output[0][0]));
+}
+
+void pointwiseconv2d_12(){
+    
+}
 
 int main (){
     init_input();
@@ -2150,6 +2421,9 @@ int main (){
     conv2d_10();
     depthwiseconv2d_10();
     pointwiseconv2d_10();
+    conv2d_11();
+    depthwiseconv2d_11();
+    pointwiseconv2d_11();
 
     return 0;
 }
