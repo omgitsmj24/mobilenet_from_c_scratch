@@ -217,6 +217,20 @@ int depthwiseconv2d_7_output[14][14][240];
 #define pointwiseconv2d_7_output_size ((depthwiseconv2d_7_output_size - pointwiseconv2d_7_kernel_size + 2 * pointwiseconv2d_7_kernel_padding) / pointwiseconv2d_7_kernel_stride + 1)
 int pointwiseconv2d_7_output[14][14][80];
 
+//Add_5 14x14x80
+#define add_5_output_size 14
+#define add_5_output_channels 80
+int add_5_output[14][14][80];
+
+//Conv2d_8 14x14x184
+#define conv2d_8_kernel_size 1
+#define conv2d_8_kernel_channels 80
+#define conv2d_8_kernel_num 184
+#define conv2d_8_kernel_stride 1
+#define conv2d_8_kernel_padding 0
+#define conv2d_8_output_size ((add_5_output_size - conv2d_8_kernel_size + 2 * conv2d_8_kernel_padding) / conv2d_8_kernel_stride + 1)
+int conv2d_8_output[14][14][184];
+
 void init_input() {
     for (int k = 0; k < input_channels; k++){
         // printf("Channel %d\n", k);
@@ -1339,6 +1353,21 @@ void pointwiseconv2d_7(){
     printf("Size of pointwiseconv2d_7_output: %d x %d x %d \n", LEN(pointwiseconv2d_7_output), LEN(pointwiseconv2d_7_output[0]), LEN(pointwiseconv2d_7_output[0][0]));
 }
 
+void add_5(){
+    for(int i = 0; i < add_5_output_size; i++){
+        for(int j = 0; j < add_5_output_size; j++){
+            for(int k = 0; k < add_5_output_channels; k++){
+                add_5_output[i][j][k] = pointwiseconv2d_7_output[i][j][k] + add_4_output[i][j][k];
+            }
+        }
+    }
+    printf("Size of add_5_output: %d x %d x %d \n", LEN(add_5_output), LEN(add_5_output[0]), LEN(add_5_output[0][0]));
+}
+
+void conv2d_8(){
+    
+}
+
 int main (){
     init_input();
     conv2d_1();
@@ -1366,5 +1395,6 @@ int main (){
     conv2d_7();
     depthwiseconv2d_7();
     pointwiseconv2d_7();
+    add_5();
     return 0;
 }
