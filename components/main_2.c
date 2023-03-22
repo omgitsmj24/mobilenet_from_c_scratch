@@ -514,9 +514,6 @@ int reshape_output[1001];
 //Softmax 1001
 int softmax_output[1001];
 
-//Top 5
-int top_5[5];
-
 void init_input() {
     for (int k = 0; k < input_channels; k++){
         // printf("Channel %d\n", k);
@@ -3098,6 +3095,5 @@ int main (){
     conv2d_17();
     reshape();
     softmax();
-
     return 0;
 }
