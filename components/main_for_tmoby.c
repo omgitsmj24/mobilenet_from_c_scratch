@@ -535,18 +535,20 @@ void conv2d_1() {
     static int conv2d_1_bias[conv2d_1_kernel_num];
     for (int k = 0; k < conv2d_1_kernel_num; k++){
         // printf("Kernel %d\n", k);
-        for (int i = 0; i < conv2d_1_kernel_size; i++) {
-            for (int j = 0; j < conv2d_1_kernel_size; j++) {
-                for (int l = 0; l < conv2d_1_kernel_channels; l++) {
-                    conv2d_1_kernel[i][j][l][k] = rand() % 5 - 2;
+        for (int l = 0; l < conv2d_1_kernel_channels; l++){
+            for (int i = 0; i < conv2d_1_kernel_size; i++) {
+                for (int j = 0; j < conv2d_1_kernel_size; j++) {
+                    conv2d_1_kernel[i][j][l][k] = conv2d_1_weights[i][j][l][k];
                     // printf("%f ", conv2d_1_kernel[i][j][l][k]);
                 }
+                // printf("\n");
             }
-            // printf("\n");
         }
     }
+
+
     for (int k = 0; k < conv2d_1_kernel_num; k++){
-        conv2d_1_bias[k] = rand() % 5 - 2;
+        conv2d_1_bias[k] = conv2d_1_biases[k];
         // printf("%f ", conv2d_1_bias[k]);
     }
     // Copy input to padded input
@@ -570,43 +572,7 @@ void conv2d_1() {
             }
         }
     }
-
     printf("Size of padded input: %d x %d x %d \n", LEN(input_padded), LEN(input_padded[0]), LEN(input_padded[0][0]));
-
-    //Print kernel in first kernel and channel
-    // for (int k = 0; k < 1; k++){
-    //     printf("Kernel %d\n", k);
-    //     for (int l = 0; l < 1; l++){
-    //         printf("Channel %d\n", l);
-    //         for (int i = 0; i < conv2d_1_kernel_size; i++) {
-    //             for (int j = 0; j < conv2d_1_kernel_size; j++) {
-    //                 printf("%d ", conv2d_1_kernel[i][j][l][k]);
-    //             }
-    //             printf("\n");
-    //         }
-    //     }
-    // }
-
-    // // Print input
-    // for (int k = 0; k < 1; k++){
-    //     printf("Channel %d\n", k);
-    //     for (int j = 0; j < input_size; j++) {
-    //         for (int i = 0; i < input_size; i++) {
-    //             printf("%d ", input[i][j][k]);
-    //         }
-    //         printf("\n");
-    //     }
-    // }
-    // // print padded input
-    // for (int k = 0; k < 1; k++){
-    //     printf("Channel %d\n", k);
-    //     for (int j = 0; j < padded_size; j++) {
-    //         for (int i = 0; i < padded_size; i++) {
-    //             printf("%d ", input_padded[i][j][k]);
-    //         }
-    //         printf("\n");
-    //     }
-    // }
 
     // Compute Conv2d_1
     for (int k = 0; k < conv2d_1_kernel_num; k++){
@@ -625,35 +591,24 @@ void conv2d_1() {
         }
     }
     printf("Size of conv2d_1_output: %d x %d x %d \n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
-    // // print output
-    // for (int k = 0; k < 1; k++){
-    //     printf("Channel %d\n", k);
-    //     for (int j = 0; j < conv2d_1_output_size; j++) {
-    //         for (int i = 0; i < conv2d_1_output_size; i++) {
-    //             printf("%d ", conv2d_1_output[i][j][k]);
-    //         }
-    //         printf("\n");
-    //     }
-    // }
 }
 
 void depthwiseconv2d_1(){
     static int depthwiseconv2d_1_kernel[depthwiseconv2d_1_kernel_size][depthwiseconv2d_1_kernel_size][depthwiseconv2d_1_kernel_channels][depthwiseconv2d_1_kernel_num];
     static int depthwiseconv2d_1_bias[depthwiseconv2d_1_kernel_channels];
     for (int k = 0; k < depthwiseconv2d_1_kernel_num; k++){
-        // printf("Kernel %d\n", k);
-        for (int i = 0; i < depthwiseconv2d_1_kernel_size; i++) {
-            for (int j = 0; j < depthwiseconv2d_1_kernel_size; j++) {
-                for (int l = 0; l < depthwiseconv2d_1_kernel_channels; l++) {
-                    depthwiseconv2d_1_kernel[i][j][l][k] = rand() % 5 - 2;
-                    // printf("%f ", depthwiseconv2d_1_kernel[i][j][l][k]);
+        for (int l = 0; l < depthwiseconv2d_1_kernel_channels; l++){
+            for (int i = 0; i < depthwiseconv2d_1_kernel_size; i++) {
+                for (int j = 0; j < depthwiseconv2d_1_kernel_size; j++) {
+                    depthwiseconv2d_1_kernel[i][j][l][k] = depthwiseconv2d_1_weights[i][j][l][k];
+                        // printf("%f ", depthwiseconv2d_1_kernel[i][j][l][k]);  
+                    }
+                // printf("\n");
                 }
             }
-            // printf("\n");
-        }
     }
     for (int k = 0; k < depthwiseconv2d_1_kernel_channels; k++){
-        depthwiseconv2d_1_bias[k] = rand() % 5 - 2;
+        depthwiseconv2d_1_bias[k] = depthwiseconv2d_1_biases[k];
         // printf("%f ", depthwiseconv2d_1_bias[k]);  
     }
 
@@ -3053,9 +3008,6 @@ void softmax(){
 
 int main (){
 
-    for (int i = 0; i < sizeof(conv2d_1_weights)/sizeof(conv2d_1_weights[0]); i++){
-        printf("conv2d_1_weights[%d]: %d \n", i, conv2d_1_weights[i]);
-    }
     init_input();
     conv2d_1();
     depthwiseconv2d_1();
