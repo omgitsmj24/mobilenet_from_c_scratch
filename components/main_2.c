@@ -1700,14 +1700,14 @@ void depthwiseconv2d_8_bonus(){
     }
 
     //Determine the padded conv2d_8_bonus_output size 
-    int depthwiseconv2d_8_bonus_padded_output_size = depthwiseconv2d_8_bonus_output_size + 2 * depthwiseconv2d_8_kernel_padding;
-    int depthwiseconv2d_8_bonus_padded_output[depthwiseconv2d_8_bonus_padded_output_size][depthwiseconv2d_8_bonus_padded_output_size][depthwiseconv2d_8_bonus_kernel_channels];
+    int conv2d_8_bonus_padded_output_size = conv2d_8_bonus_output_size + 2 * depthwiseconv2d_8_kernel_padding;
+    int conv2d_8_bonus_padded_output[conv2d_8_bonus_padded_output_size][conv2d_8_bonus_padded_output_size][depthwiseconv2d_8_bonus_kernel_channels];
 
     //Initialize the padded conv2d_8_bonus_output with 0
-    for(int i = 0; i < depthwiseconv2d_8_bonus_padded_output_size; i++){
-        for(int j = 0; j < depthwiseconv2d_8_bonus_padded_output_size; j++){
+    for(int i = 0; i < conv2d_8_bonus_padded_output_size; i++){
+        for(int j = 0; j < conv2d_8_bonus_padded_output_size; j++){
             for(int k = 0; k < depthwiseconv2d_8_bonus_kernel_channels; k++){
-                depthwiseconv2d_8_bonus_padded_output[i][j][k] = 0;
+                conv2d_8_bonus_padded_output[i][j][k] = 0;
             }
         }
     }
@@ -1716,12 +1716,12 @@ void depthwiseconv2d_8_bonus(){
     for(int i = 1; i < depthwiseconv2d_8_bonus_output_size - 1; i++){
         for(int j = 1; j < depthwiseconv2d_8_bonus_output_size - 1; j++){
             for(int k = 0; k < depthwiseconv2d_8_bonus_kernel_channels; k++){
-                depthwiseconv2d_8_bonus_padded_output[i][j][k] = conv2d_8_bonus_output[i][j][k];
+                conv2d_8_bonus_padded_output[i][j][k] = conv2d_8_bonus_output[i][j][k];
             }
         }
     }
 
-    printf("Size of depthwiseconv2d_8_bonus_padded_output: %d x %d x %d \n", LEN(depthwiseconv2d_8_bonus_padded_output), LEN(depthwiseconv2d_8_bonus_padded_output[0]), LEN(depthwiseconv2d_8_bonus_padded_output[0][0]));
+    printf("Size of conv2d_8_bonus_padded_output: %d x %d x %d \n", LEN(conv2d_8_bonus_padded_output), LEN(conv2d_8_bonus_padded_output[0]), LEN(conv2d_8_bonus_padded_output[0][0]));
     
     //Perform depthwiseconv2d_8_bonus
     for(int k = 0; k < depthwiseconv2d_8_bonus_kernel_num; k++){
@@ -1731,7 +1731,7 @@ void depthwiseconv2d_8_bonus(){
                 for(int l = 0; l < depthwiseconv2d_8_bonus_kernel_channels; l++){
                     for(int m = 0; m < depthwiseconv2d_8_bonus_kernel_size; m++){
                         for(int n = 0; n < depthwiseconv2d_8_bonus_kernel_size; n++){
-                            depthwiseconv2d_8_bonus_output[i][j][l] += depthwiseconv2d_8_bonus_padded_output[i + m][j + n][l] * depthwiseconv2d_8_bonus_kernel[m][n][l][k];
+                            depthwiseconv2d_8_bonus_output[i][j][l] += conv2d_8_bonus_padded_output[i + m][j + n][l] * depthwiseconv2d_8_bonus_kernel[m][n][l][k];
                         }
                     }
                     depthwiseconv2d_8_bonus_output[i][j][k] += depthwiseconv2d_8_bonus_bias[l];
