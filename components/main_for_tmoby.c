@@ -661,7 +661,7 @@ void pointwiseconv2d_1(){
         for (int i = 0; i < pointwiseconv2d_1_kernel_size; i++) {
             for (int j = 0; j < pointwiseconv2d_1_kernel_size; j++) {
                 for (int l = 0; l < pointwiseconv2d_1_kernel_channels; l++) {
-                    pointwiseconv2d_1_kernel[i][j][l][k] = rand() % 5 - 2;
+                    pointwiseconv2d_1_kernel[i][j][l][k] = piecewiseconv2d_1_weights[i][j][l][k];
                     // printf("%f ", pointwiseconv2d_1_kernel[i][j][l][k]);
                 }
             }
@@ -669,7 +669,7 @@ void pointwiseconv2d_1(){
         }
     }
     for (int k = 0; k < pointwiseconv2d_1_kernel_num; k++){
-        pointwiseconv2d_1_bias[k] = rand() % 5 - 2;
+        pointwiseconv2d_1_bias[k] = piecewiseconv2d_1_biases[k];
         // printf("%f ", pointwiseconv2d_1_bias[k]);
     }
     for(int k = 0; k < pointwiseconv2d_1_kernel_num; k++){
