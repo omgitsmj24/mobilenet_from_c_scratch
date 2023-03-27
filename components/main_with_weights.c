@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "weights/weights.h"
+#include "external/weights.h"
+#include "external/input.h"
 
 #define LEN(arr) ((int) (sizeof (arr) / sizeof (arr)[0]))
 
 //Input 224x224x3
 #define input_size 224
 #define input_channels 3
-int input[input_size][input_size][input_channels];
+// int input[input_size][input_size][input_channels];
 
 //Conv2d_1 112x112x16
 #define conv2d_1_weights_size 3
@@ -517,17 +518,10 @@ int reshape_output[1001];
 int softmax_output[1001];
 
 void init_input() {
-    for (int k = 0; k < input_channels; k++){
-        // printf("Channel %d\n", k);
-        for (int i = 0; i < input_size; i++) {
-            for (int j = 0; j < input_size; j++) {
-                input[i][j][k] = rand() % 256;
-                // printf("%f ", input[i][j][k]);
-            }
-            // printf("\n");
-        }
-    }
+    //Print first element of input
     printf("Size of input: %d x %d x %d \n", LEN(input), LEN(input[0]), LEN(input[0][0]));
+    printf("First element of input: %d\n", input[0][0][0]);
+
 }
 
 void conv2d_1() {
@@ -571,6 +565,7 @@ void conv2d_1() {
             }
         }
     }
+    printf("First element of conv2d_1_output: %d\n", conv2d_1_output[0][0][0]);
     printf("Size of conv2d_1_output: %d x %d x %d \n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
 }
 
@@ -614,6 +609,7 @@ void dw1(){
             }
         }
     }
+    printf("First element of dw1_output: %d\n", dw1_output[0][0][0]);
     printf("Size of dw1_output: %d x %d x %d \n", LEN(dw1_output), LEN(dw1_output[0]), LEN(dw1_output[0][0]));
 }
 
@@ -634,6 +630,7 @@ void pw1(){
             }
         }
     }
+    printf("First element of pw1_output: %d\n", pw1_output[0][0][0]);
     printf("Size of pw1_output: %d x %d x %d \n", LEN(pw1_output), LEN(pw1_output[0]), LEN(pw1_output[0][0]));
 
 }
@@ -649,6 +646,7 @@ void add_1() {
         }
         // printf("\n");
     }
+    printf("First element of add_1_output: %d\n", add_1_output[0][0][0]);
     printf("Size of add_1_output: %d x %d x %d \n", LEN(add_1_output), LEN(add_1_output[0]), LEN(add_1_output[0][0]));
 }
 
@@ -669,6 +667,7 @@ void conv2d_2(){
             }
         }
     }
+    printf("First element of conv2d_2_output: %d\n", conv2d_2_output[0][0][0]);
     printf("Size of conv2d_2_output: %d x %d x %d \n", LEN(conv2d_2_output), LEN(conv2d_2_output[0]), LEN(conv2d_2_output[0][0]));
 }
 
@@ -713,7 +712,7 @@ void dw2(){
         }
     }
 
-
+    printf("First element of dw2_output: %d\n", dw2_output[0][0][0]);
     printf("Size of dw2_output: %d x %d x %d \n", LEN(dw2_output), LEN(dw2_output[0]), LEN(dw2_output[0][0]));
 }
 
@@ -735,7 +734,7 @@ void pw2(){
             }
         }
     }
-
+    printf("First element of pw2_output: %d\n", pw2_output[0][0][0]);
     printf("Size of pw2_output: %d x %d x %d \n", LEN(pw2_output), LEN(pw2_output[0]), LEN(pw2_output[0][0]));
 }
 
@@ -757,6 +756,7 @@ void conv2d_3(){
             }
         }
     }
+    printf("First element of conv2d_3_output: %d\n", conv2d_3_output[0][0][0]);
     printf("Size of conv2d_3_output: %d x %d x %d \n", LEN(conv2d_3_output), LEN(conv2d_3_output[0]), LEN(conv2d_3_output[0][0]));
 }
 
@@ -798,7 +798,7 @@ void dw3(){
             }
         }
     }
-    
+    printf("First element of dw3_output: %d\n", dw3_output[0][0][0]);
     printf("Size of dw3_output: %d x %d x %d \n", LEN(dw3_output), LEN(dw3_output[0]), LEN(dw3_output[0][0]));
 }
 
@@ -820,6 +820,7 @@ void pw3(){
             }
         }
     }
+    printf("First element of dw3_output: %d\n", dw3_output[0][0][0]);
     printf("Size of pw3_output: %d x %d x %d \n", LEN(pw3_output), LEN(pw3_output[0]), LEN(pw3_output[0][0]));
 }
 
@@ -831,6 +832,7 @@ void add_2(){
             }
         }
     }
+    printf("First element of add_2_output: %d\n", add_2_output[0][0][0]);
     printf("Size of add_2_output: %d x %d x %d \n", LEN(add_2_output), LEN(add_2_output[0]), LEN(add_2_output[0][0]));
 }
 
@@ -852,6 +854,7 @@ void conv2d_4(){
             }
         }
     }
+    printf("First element of conv2d_4_output: %d\n", conv2d_4_output[0][0][0]);
     printf("Size of conv2d_4_output: %d x %d x %d \n", LEN(conv2d_4_output), LEN(conv2d_4_output[0]), LEN(conv2d_4_output[0][0]));
 }
 
@@ -894,7 +897,7 @@ void dw4(){
             }
         }
     }
-
+    printf("First element of dw4_output: %d\n", dw4_output[0][0][0]);
     printf("Size of dw4_output: %d x %d x %d \n", LEN(dw4_output), LEN(dw4_output[0]), LEN(dw4_output[0][0]));
 }
 
@@ -916,7 +919,7 @@ void pw4(){
             }
         }
     }
-
+    printf("First element of pw4_output: %d\n", pw4_output[0][0][0]);
     printf("Size of pw4_output: %d x %d x %d \n", LEN(pw4_output), LEN(pw4_output[0]), LEN(pw4_output[0][0]));
 }
 
@@ -938,7 +941,7 @@ void conv2d_5(){
             }
         }
     }
-
+    printf("First element of conv2d_5_output: %d\n", conv2d_5_output[0][0][0]);
     printf("Size of conv2d_5_output: %d x %d x %d \n", LEN(conv2d_5_output), LEN(conv2d_5_output[0]), LEN(conv2d_5_output[0][0]));
 }
 
@@ -982,7 +985,7 @@ void dw5(){
             }
         }
     }
-
+    printf("First element of dw5_output: %d\n", dw5_output[0][0][0]);
     printf("Size of dw5_output: %d x %d x %d \n", LEN(dw5_output), LEN(dw5_output[0]), LEN(dw5_output[0][0]));
 }
 
@@ -1004,7 +1007,7 @@ void pw5(){
             }
         }
     }
-
+    printf("First element of pw5_output: %d\n", pw5_output[0][0][0]);
     printf("Size of pw5_output: %d x %d x %d \n", LEN(pw5_output), LEN(pw5_output[0]), LEN(pw5_output[0][0]));
 }
 
@@ -1016,7 +1019,7 @@ void add_3(){
             }
         }
     }
-
+    printf("First element of add_3_output: %d\n", add_3_output[0][0][0]);
     printf("Size of add_3_output: %d x %d x %d \n", LEN(add_3_output), LEN(add_3_output[0]), LEN(add_3_output[0][0]));
 }
 
@@ -1038,7 +1041,7 @@ void conv2d_6(){
             }
         }
     }
-
+    printf("First element of conv2d_6_output: %d\n", conv2d_6_output[0][0][0]);
     printf("Size of conv2d_6_output: %d x %d x %d \n", LEN(conv2d_6_output), LEN(conv2d_6_output[0]), LEN(conv2d_6_output[0][0]));
 }
 
@@ -1081,6 +1084,7 @@ void dw6(){
             }
         }
     }
+    printf("First element of dw6_output: %d\n", dw6_output[0][0][0]);
     printf("Size of dw6_output: %d x %d x %d \n", LEN(dw6_output), LEN(dw6_output[0]), LEN(dw6_output[0][0]));
 }
 
@@ -1102,6 +1106,7 @@ void pw6(){
             }
         }
     }
+    printf("First element of pw6_output: %d\n", pw6_output[0][0][0]);
     printf("Size of pw6_output: %d x %d x %d \n", LEN(pw6_output), LEN(pw6_output[0]), LEN(pw6_output[0][0]));
 }
 
@@ -1113,6 +1118,7 @@ void add_4(){
             }
         }
     }
+    printf("First element of add_4_output: %d\n", add_4_output[0][0][0]);
     printf("Size of add_4_output: %d x %d x %d \n", LEN(add_4_output), LEN(add_4_output[0]), LEN(add_4_output[0][0]));
 }
 
@@ -1134,7 +1140,7 @@ void conv2d_7(){
             }
         }
     }
-
+    printf("First element of conv2d_7_output: %d\n", conv2d_7_output[0][0][0]);
     printf("Size of conv2d_7_output: %d x %d x %d \n", LEN(conv2d_7_output), LEN(conv2d_7_output[0]), LEN(conv2d_7_output[0][0]));
 }
 
@@ -1178,7 +1184,7 @@ void dw7(){
             }
         }
     }
-
+    printf("First element of dw7_output: %d\n", dw7_output[0][0][0]);
     printf("Size of dw7_output: %d x %d x %d \n", LEN(dw7_output), LEN(dw7_output[0]), LEN(dw7_output[0][0]));
 }
 
@@ -1200,6 +1206,7 @@ void pw7(){
             }
         }
     }
+    printf("First element of pw7_output: %d\n", pw7_output[0][0][0]);
     printf("Size of pw7_output: %d x %d x %d \n", LEN(pw7_output), LEN(pw7_output[0]), LEN(pw7_output[0][0]));
 }
 
@@ -1221,6 +1228,7 @@ void conv2d_8(){
             }
         }
     }
+    printf("First element of conv2d_8_output: %d\n", conv2d_8_output[0][0][0]);
     printf("Size of conv2d_8_output: %d x %d x %d \n", LEN(conv2d_8_output), LEN(conv2d_8_output[0]), LEN(conv2d_8_output[0][0]));
 }
 
@@ -1247,7 +1255,7 @@ void dw8(){
             }
         }
     }
-
+    printf("First element of conv2d_8_padded_output: %d\n", conv2d_8_padded_output[0][0][0]);
     printf("Size of conv2d_8_padded_output: %d x %d x %d \n", LEN(conv2d_8_padded_output), LEN(conv2d_8_padded_output[0]), LEN(conv2d_8_padded_output[0][0]));
     
     //Perform dw8
@@ -1266,6 +1274,7 @@ void dw8(){
             }
         }
     }
+    printf("First element of dw8_output: %d\n", dw8_output[0][0][0]);
     printf("Size of dw8_output: %d x %d x %d \n", LEN(dw8_output), LEN(dw8_output[0]), LEN(dw8_output[0][0]));
 }
 
@@ -1287,6 +1296,7 @@ void pw8(){
             }
         }
     }
+    printf("First element of pw8_output: %d\n", pw8_output[0][0][0]);
     printf("Size of pw8_output: %d x %d x %d \n", LEN(pw8_output), LEN(pw8_output[0]), LEN(pw8_output[0][0]));
 }
 
@@ -1298,6 +1308,7 @@ void add_5(){
             }
         }
     }
+    printf("First element of add_5_output: %d\n", add_5_output[0][0][0]);
     printf("Size of add_5_output: %d x %d x %d \n", LEN(add_5_output), LEN(add_5_output[0]), LEN(add_5_output[0][0]));
 }
 
@@ -1319,6 +1330,7 @@ void conv2d_9(){
             }
         }
     }
+    printf("First element of conv2d_9_output: %d\n", conv2d_9_output[0][0][0]);
     printf("Size of conv2d_9_output: %d x %d x %d \n", LEN(conv2d_9_output), LEN(conv2d_9_output[0]), LEN(conv2d_9_output[0][0]));
 }
 
@@ -1361,6 +1373,7 @@ void dw9(){
             }
         }
     }
+    printf("First element of dw9_output: %d\n", dw9_output[0][0][0]);
     printf("Size of dw9_output: %d x %d x %d \n", LEN(dw9_output), LEN(dw9_output[0]), LEN(dw9_output[0][0]));
 }
 
@@ -1382,7 +1395,7 @@ void pw9(){
             }
         }
     }
-
+    printf("First element of pw9_output: %d\n", pw9_output[0][0][0]);
     printf("Size of pw9_output: %d x %d x %d \n", LEN(pw9_output), LEN(pw9_output[0]), LEN(pw9_output[0][0]));
 }
 
@@ -1395,6 +1408,7 @@ void add_6(){
             }
         }
     }
+    printf("First element of add_6_output: %d\n", add_6_output[0][0][0]);
     printf("Size of add_6_output: %d x %d x %d \n", LEN(add_6_output), LEN(add_6_output[0]), LEN(add_6_output[0][0]));
 }
 
@@ -1416,6 +1430,7 @@ void conv2d_10(){
             }
         }
     }
+    printf("First element of conv2d_10_output: %d\n", conv2d_10_output[0][0][0]);
     printf("Size of conv2d_10_output: %d x %d x %d \n", LEN(conv2d_10_output), LEN(conv2d_10_output[0]), LEN(conv2d_10_output[0][0]));
 }
 
@@ -1459,7 +1474,7 @@ void dw10(){
             }
         }
     }
-
+    printf("First element of dw10_output: %d\n", dw10_output[0][0][0]);
     printf("Size of dw10_output: %d x %d x %d \n", LEN(dw10_output), LEN(dw10_output[0]), LEN(dw10_output[0][0]));
 }
 
@@ -1477,7 +1492,7 @@ void pw10(){
             }
         }
     }
-
+    printf("First element of pw10_output: %d\n", pw10_output[0][0][0]);
     printf("Size of pw10_output: %d x %d x %d \n", LEN(pw10_output), LEN(pw10_output[0]), LEN(pw10_output[0][0]));
 }
 
@@ -1490,7 +1505,7 @@ void add_7(){
             }
         }
     }
-
+    printf("First element of add_7_output: %d\n", add_7_output[0][0][0]);
     printf("Size of add_7_output: %d x %d x %d \n", LEN(add_7_output), LEN(add_7_output[0]), LEN(add_7_output[0][0]));
 }
 
@@ -1512,7 +1527,7 @@ void conv2d_11(){
             }
         }
     }
-
+    printf("First element of conv2d_11_output: %d\n", conv2d_11_output[0][0][0]);
     printf("Size of conv2d_11_output: %d x %d x %d \n", LEN(conv2d_11_output), LEN(conv2d_11_output[0]), LEN(conv2d_11_output[0][0]));
 }
 
@@ -1556,6 +1571,7 @@ void dw11(){
             }
         }
     }
+    printf("First element of dw11_output: %d\n", dw11_output[0][0][0]);
     printf("Size of dw11_output: %d x %d x %d \n", LEN(dw11_output), LEN(dw11_output[0]), LEN(dw11_output[0][0]));
 }
 
@@ -1573,7 +1589,7 @@ void pw11(){
             }
         }
     }
-
+    printf("First element of pw11_output: %d\n", pw11_output[0][0][0]);
     printf("Size of pw11_output: %d x %d x %d \n", LEN(pw11_output), LEN(pw11_output[0]), LEN(pw11_output[0][0]));
 }
 
@@ -1595,6 +1611,7 @@ void conv2d_12(){
             }
         }
     }
+    printf("First element of conv2d_12_output: %d\n", conv2d_12_output[0][0][0]);
     printf("Size of conv2d_12_output: %d x %d x %d \n", LEN(conv2d_12_output), LEN(conv2d_12_output[0]), LEN(conv2d_12_output[0][0]));
 }
 
@@ -1629,7 +1646,7 @@ void dw12(){
             }
         }
     }
-
+    printf("First element of dw12_output: %d\n", dw12_output[0][0][0]);
     printf("Size of dw12_output: %d x %d x %d \n", LEN(dw12_output), LEN(dw12_output[0]), LEN(dw12_output[0][0]));
 }
 
@@ -1651,6 +1668,7 @@ void pw12(){
             }
         }
     }
+    printf("First element of pw12_output: %d\n", pw12_output[0][0][0]);
     printf("Size of pw12_output: %d x %d x %d \n", LEN(pw12_output), LEN(pw12_output[0]), LEN(pw12_output[0][0]));
 }
 
@@ -1663,6 +1681,7 @@ void add_8(){
             }
         }
     }
+    printf("First element of add_8_output: %d\n", add_8_output[0][0][0]);
     printf("Size of add_8_output: %d x %d x %d \n", LEN(add_8_output), LEN(add_8_output[0]), LEN(add_8_output[0][0]));
 }
 
@@ -1684,6 +1703,7 @@ void conv2d_13(){
             }
         }
     }
+    printf("First element of conv2d_13_output: %d\n", conv2d_13_output[0][0][0]);
     printf("Size of conv2d_13_output: %d x %d x %d \n", LEN(conv2d_13_output), LEN(conv2d_13_output[0]), LEN(conv2d_13_output[0][0]));
 }
 
@@ -1724,6 +1744,7 @@ void dw13(){
             }
         }
     }
+    printf("First element of dw13_output: %d\n", dw13_output[0][0][0]);
     printf("Size of dw13_output: %d x %d x %d \n", LEN(dw13_output), LEN(dw13_output[0]), LEN(dw13_output[0][0]));
 }
 
@@ -1745,6 +1766,7 @@ void pw13(){
             }
         }
     }
+    printf("First element of pw13_output: %d\n", pw13_output[0][0][0]);
     printf("Size of pw13_output: %d x %d x %d \n", LEN(pw13_output), LEN(pw13_output[0]), LEN(pw13_output[0][0]));
 }
 
@@ -1766,6 +1788,7 @@ void conv2d_14(){
             }
         }
     }
+    printf("First element of conv2d_14_output: %d\n", conv2d_14_output[0][0][0]);
     printf("Size of conv2d_14_output: %d x %d x %d \n", LEN(conv2d_14_output), LEN(conv2d_14_output[0]), LEN(conv2d_14_output[0][0]));
 }
 
@@ -1807,6 +1830,7 @@ void dw14(){
             }
         }
     }
+    printf("First element of dw14_output: %d\n", dw14_output[0][0][0]);
     printf("Size of dw14_output: %d x %d x %d \n", LEN(dw14_output), LEN(dw14_output[0]), LEN(dw14_output[0][0]));
 }
 
@@ -1827,6 +1851,7 @@ void pw14(){
             }
         }
     }
+    printf("First element of pw14_output: %d\n", pw14_output[0][0][0]);
     printf("Size of pw14_output: %d x %d x %d \n", LEN(pw14_output), LEN(pw14_output[0]), LEN(pw14_output[0][0]));
 }
 
@@ -1839,6 +1864,7 @@ void add_9(){
             }
         }
     }
+    printf("First element of add_9_output: %d\n", add_9_output[0][0][0]);
     printf("Size of add_9_output: %d x %d x %d \n", LEN(add_9_output), LEN(add_9_output[0]), LEN(add_9_output[0][0]));
 }
 
@@ -1860,6 +1886,7 @@ void conv2d_15(){
             }
         }
     }
+    printf("First element of conv2d_15_output: %d\n", conv2d_15_output[0][0][0]);
     printf("Size of conv2d_15_output: %d x %d x %d \n", LEN(conv2d_15_output), LEN(conv2d_15_output[0]), LEN(conv2d_15_output[0][0]));
 }
 
@@ -1902,6 +1929,7 @@ void dw15(){
             }
         }
     }
+    printf("First element of dw15_output: %d\n", dw15_output[0][0][0]);
     printf("Size of dw15_output: %d x %d x %d \n", LEN(dw15_output), LEN(dw15_output[0]), LEN(dw15_output[0][0]));
 }
 
@@ -1923,6 +1951,7 @@ void pw15(){
             }
         }
     }
+    printf("First element of pw15_output: %d\n", pw15_output[0][0][0]);
     printf("Size of pw15_output: %d x %d x %d \n", LEN(pw15_output), LEN(pw15_output[0]), LEN(pw15_output[0][0]));
 }
 
@@ -1935,6 +1964,7 @@ void add_10(){
             }
         }
     }
+    printf("First element of add_10_output: %d\n", add_10_output[0][0][0]);
     printf("Size of add_10_output: %d x %d x %d \n", LEN(add_10_output), LEN(add_10_output[0]), LEN(add_10_output[0][0]));
 }
 
@@ -1956,6 +1986,7 @@ void conv2d_16(){
             }
         }
     }
+    printf("First element of conv2d_16_output: %d\n", conv2d_16_output[0][0][0]);
     printf("Size of conv2d_16_output: %d x %d x %d \n", LEN(conv2d_16_output), LEN(conv2d_16_output[0]), LEN(conv2d_16_output[0][0]));
 }
 
@@ -1975,6 +2006,7 @@ void averagepool2d_1(){
             }
         }
     }
+    printf("First element of averagepool2d_1_output: %d\n", averagepool2d_1_output[0][0][0]);
     printf("Size of averagepool2d_1_output: %d x %d x %d \n", LEN(averagepool2d_1_output), LEN(averagepool2d_1_output[0]), LEN(averagepool2d_1_output[0][0]));
 }
 
@@ -1996,6 +2028,7 @@ void conv2d_17(){
             }
         }
     }
+    printf("First element of conv2d_17_output: %d\n", conv2d_17_output[0][0][0]);
     printf("Size of conv2d_17_output: %d x %d x %d \n", LEN(conv2d_17_output), LEN(conv2d_17_output[0]), LEN(conv2d_17_output[0][0]));
 } 
 
@@ -2015,6 +2048,7 @@ void averagepool2d_2(){
             }
         }
     }
+    printf("First element of averagepool2d_2_output: %d\n", averagepool2d_2_output[0][0][0]);
     printf("Size of averagepool2d_2_output: %d x %d x %d \n", LEN(averagepool2d_2_output), LEN(averagepool2d_2_output[0]), LEN(averagepool2d_2_output[0][0]));
 }
 
@@ -2036,6 +2070,7 @@ void conv2d_18(){
             }
         }
     }
+    printf("First element of conv2d_18_output: %d\n", conv2d_18_output[0][0][0]);
     printf("Size of conv2d_18_output: %d x %d x %d \n", LEN(conv2d_18_output), LEN(conv2d_18_output[0]), LEN(conv2d_18_output[0][0]));
 }
 
@@ -2048,6 +2083,7 @@ void reshape(){
             }
         }
     }
+    printf("First element of reshape_output: %d\n", reshape_output[0]);
     printf("Size of reshape_output: %d \n", LEN(reshape_output));
     // for (int i = 0; i < LEN(reshape_output); i++){
     //     printf("reshape_output[%d]: %d \n", i, reshape_output[i]);
@@ -2063,6 +2099,7 @@ void softmax(){
     for(int i = 0; i < conv2d_18_weights_num; i++){
         softmax_output[i] = exp(reshape_output[i]) / sum;
     }
+    printf("First element of softmax_output: %d\n", softmax_output[0]);
     printf("Size of softmax_output: %d \n", LEN(softmax_output));
     // for (int i = 0; i < LEN(softmax_output); i++){
     //     printf("softmax_output[%d]: %d \n", i, softmax_output[i]);
@@ -2085,7 +2122,6 @@ void softmax(){
 }
 
 int main (){
-
     init_input();
     conv2d_1();
     dw1();
