@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 #include "external/weights.h"
@@ -9,7 +10,8 @@
 //Input 224x224x3
 #define input_size 224
 #define input_channels 3
-// int input[input_size][input_size][input_channels];
+#define input_scale 0.007874015718698502
+#define input_zero_point 128
 
 //Conv2d_1 112x112x16
 #define conv2d_1_weights_size 3
@@ -18,6 +20,8 @@
 #define conv2d_1_weights_stride 2
 #define conv2d_1_weights_padding (1.0/2.0)
 #define conv2d_1_output_size 112
+#define conv2d_1_output_scale 0.14435869455337524 
+#define conv2d_1_output_zero_point 99
 int conv2d_1_output[112][112][16];
 
 //dw1 112x112x16
@@ -521,10 +525,10 @@ void init_input() {
     //Print first element of input
     printf("Size of input: %d x %d x %d \n", LEN(input), LEN(input[0]), LEN(input[0][0]));
     printf("First element of input: %d\n", input[0][0][0]);
-
 }
 
 void conv2d_1() {
+    uint8_t q_input[224][224][3] = input;
 
     // Copy input to padded input
     static const int padded_size = 225;
