@@ -30,7 +30,7 @@
 #define conv2d_1_output_scale 0.6599291563034058 
 #define conv2d_1_output_zero_point 0
 
-int conv2d_1_output[112][112][16];
+uint8_t conv2d_1_output[112][112][16];
 
 //dw1 112x112x16
 #define dw1_weights_size 3
@@ -529,11 +529,11 @@ int reshape_output[1001];
 //Softmax 1001
 int softmax_output[1001];
 
-int quantize(int input_before_quantize, float scale, int zero_point) {
-    return (((input_before_quantize / scale) + zero_point) - zero_point);
+float quantize(int input_before_quantize, float scale, int zero_point) {
+    return (input_before_quantize - zero_point)*scale;
 };
 
-void frexp_function(float multiplier, int *fraction, int *exponent) {
+void frexp_function(float multiplier, float *fraction, int *exponent) {
     *fraction = frexp(multiplier, &(*exponent));
 }
 
@@ -543,35 +543,22 @@ void init_input() {
     printf("First element of input: %d\n", input[0][0][0]);
 }
 
+
+
 void conv2d_1() {
 
     const float conv2d_1_multiplier = input_scale * conv2d_1_weights_scale / conv2d_1_output_scale;
 
-    for (int i = 0; i < input_size; i++){
-        for (int j = 0; j < input_size; j++){
-            for (int k = 0; k < input_channels; k++){
-                input[i][j][k] = quantize(input[i][j][k], input_scale, input_zero_point);
-            }
-        }
-    }
-    for (int l = 0; l < conv2d_1_weights_num; l++){
-        for (int i = 0; i < conv2d_1_weights_size; i++){
-            for (int j = 0; j < conv2d_1_weights_size; j++){
-                for (int k = 0; k < conv2d_1_weights_channels; k++){
-                    conv2d_1_weights[i][j][k][l] = quantize(conv2d_1_weights[i][j][k][l], conv2d_1_weights_scale, conv2d_1_weights_zero_point);
-                }
-            }
-        }
-    }
-
-    // Normalized fraction the conv2d_1_multiplier
-    int conv2d_1_fraction;
+    // Normalized fraction and exponent the conv2d_1_multiplier
+    float conv2d_1_fraction;
     int conv2d_1_exponent;
     frexp_function(conv2d_1_multiplier, &conv2d_1_fraction, &conv2d_1_exponent);
+    int conv2d_1_fraction_int32 = conv2d_1_fraction * (1ll << 31);
+    printf("conv2d_1_multiplier = %f = %d * 2^%d\n", conv2d_1_multiplier, conv2d_1_fraction_int32, conv2d_1_exponent);
 
     // Copy input to padded input
     static const int padded_size = 225;
-    static int input_padded[225][225][input_channels];
+    static uint8_t input_padded[225][225][input_channels];
 
     // Initilalize padded input with 0
     for (int k = 0; k < input_channels; k++){
@@ -590,27 +577,29 @@ void conv2d_1() {
             }
         }
     }
+
     printf("Size of padded input: %d x %d x %d \n", LEN(input_padded), LEN(input_padded[0]), LEN(input_padded[0][0]));
 
+    int32_t pre_conv2d_output_1[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
     // Compute Conv2d_1
     for (int k = 0; k < conv2d_1_weights_num; k++){
         for (int i = 0; i < conv2d_1_output_size; i++) {
             for (int j = 0; j < conv2d_1_output_size; j++) {
-                conv2d_1_output[i][j][k] = 0;
+                pre_conv2d_output_1[i][j][k] = 0;
                 for (int l = 0; l < conv2d_1_weights_channels; l++) {
                     for (int m = 0; m < conv2d_1_weights_size; m++) {
                         for (int n = 0; n < conv2d_1_weights_size; n++) {
-                            conv2d_1_output[i][j][k] += input_padded[i*conv2d_1_weights_stride + m][j*conv2d_1_weights_stride + n][l] * conv2d_1_weights[m][n][l][k];
+                            pre_conv2d_output_1[i][j][k] += input_padded[i*conv2d_1_weights_stride + m][j*conv2d_1_weights_stride + n][l] * conv2d_1_weights[m][n][l][k];
                         }
                     }
                 }
-                conv2d_1_output[i][j][k] = conv2d_1_output[i][j][k] * conv2d_1_fraction * pow(2, conv2d_1_exponent) + conv2d_1_output_zero_point;
-                conv2d_1_output[i][j][k] += conv2d_1_biases[k];
+                pre_conv2d_output_1[i][j][k] += conv2d_1_biases[k];
+                pre_conv2d_output_1[i][j][k] = pre_conv2d_output_1[i][j][k] * conv2d_1_fraction_int32 /(1ll << 31) * (1ll << conv2d_1_exponent);
             }
         }
     }
-    printf("First element of conv2d_1_output: %d\n", conv2d_1_output[0][0][0]);
-    printf("Size of conv2d_1_output: %d x %d x %d \n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
+    printf("First element of conv2d_1_output: %d\n", pre_conv2d_output_1[0][0][0]);
+    printf("Size of conv2d_1_output: %d x %d x %d \n\n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
 }
 
 void dw1(){
@@ -2168,68 +2157,68 @@ void softmax(){
 int main (){
     init_input();
     conv2d_1();
-    dw1();
-    pw1();
-    add_1();
-    conv2d_2();
-    dw2();
-    pw2();
-    conv2d_3();
-    dw3();
-    pw3();
-    add_2();
-    conv2d_4();
-    dw4();
-    pw4();
-    conv2d_5();
-    dw5();
-    pw5();
-    add_3();
-    conv2d_6();
-    dw6();
-    pw6();
-    add_4();
-    conv2d_7();
-    dw7();
-    pw7();
-    //Added start
-    conv2d_8();
-    dw8();
-    pw8();
-    //Added stop
-    add_5();
-    conv2d_9();
-    dw9();
-    pw9();
-    add_6();
-    conv2d_10();
-    dw10();
-    pw10();
-    add_7();
-    conv2d_11();
-    dw11();
-    pw11();
-    conv2d_12();
-    dw12();
-    pw12();
-    add_8();
-    conv2d_13();
-    dw13();
-    pw13();
-    conv2d_14();
-    dw14();
-    pw14();
-    add_9();
-    conv2d_15();
-    dw15();
-    pw15();
-    add_10();
-    conv2d_16();
-    averagepool2d_1();
-    conv2d_17();
-    averagepool2d_2();
-    conv2d_18();
-    reshape();
-    softmax();
+    // dw1();
+    // pw1();
+    // add_1();
+    // conv2d_2();
+    // dw2();
+    // pw2();
+    // conv2d_3();
+    // dw3();
+    // pw3();
+    // add_2();
+    // conv2d_4();
+    // dw4();
+    // pw4();
+    // conv2d_5();
+    // dw5();
+    // pw5();
+    // add_3();
+    // conv2d_6();
+    // dw6();
+    // pw6();
+    // add_4();
+    // conv2d_7();
+    // dw7();
+    // pw7();
+    // //Added start
+    // conv2d_8();
+    // dw8();
+    // pw8();
+    // //Added stop
+    // add_5();
+    // conv2d_9();
+    // dw9();
+    // pw9();
+    // add_6();
+    // conv2d_10();
+    // dw10();
+    // pw10();
+    // add_7();
+    // conv2d_11();
+    // dw11();
+    // pw11();
+    // conv2d_12();
+    // dw12();
+    // pw12();
+    // add_8();
+    // conv2d_13();
+    // dw13();
+    // pw13();
+    // conv2d_14();
+    // dw14();
+    // pw14();
+    // add_9();
+    // conv2d_15();
+    // dw15();
+    // pw15();
+    // add_10();
+    // conv2d_16();
+    // averagepool2d_1();
+    // conv2d_17();
+    // averagepool2d_2();
+    // conv2d_18();
+    // reshape();
+    // softmax();
     return 0;
 }
