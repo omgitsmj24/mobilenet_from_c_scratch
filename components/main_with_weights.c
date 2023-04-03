@@ -10,6 +10,7 @@
 //Input 224x224x3
 #define input_size 224
 #define input_channels 3
+
 #define input_scale 0.007874015718698502
 #define input_zero_point 128
 
@@ -19,9 +20,16 @@
 #define conv2d_1_weights_num 16
 #define conv2d_1_weights_stride 2
 #define conv2d_1_weights_padding (1.0/2.0)
+#define conv2d_1_weights_scale 0.14435869455337524 
+#define conv2d_1_weights_zero_point 99
+
+#define conv2d_1_bias_scale 0.0011366826947778463 
+#define conv2d_1_bias_zero_point 0
+
 #define conv2d_1_output_size 112
-#define conv2d_1_output_scale 0.14435869455337524 
-#define conv2d_1_output_zero_point 99
+#define conv2d_1_output_scale 0.6599291563034058 
+#define conv2d_1_output_zero_point 0
+
 int conv2d_1_output[112][112][16];
 
 //dw1 112x112x16
@@ -521,6 +529,14 @@ int reshape_output[1001];
 //Softmax 1001
 int softmax_output[1001];
 
+int quantize(int input_before_quantize, float scale, int zero_point) {
+    return (((input_before_quantize / scale) + zero_point) - zero_point);
+};
+
+void frexp_function(float multiplier, int *fraction, int *exponent) {
+    *fraction = frexp(multiplier, &(*exponent));
+}
+
 void init_input() {
     //Print first element of input
     printf("Size of input: %d x %d x %d \n", LEN(input), LEN(input[0]), LEN(input[0][0]));
@@ -528,7 +544,30 @@ void init_input() {
 }
 
 void conv2d_1() {
-    uint8_t q_input[224][224][3] = input;
+
+    const float conv2d_1_multiplier = input_scale * conv2d_1_weights_scale / conv2d_1_output_scale;
+
+    for (int i = 0; i < input_size; i++){
+        for (int j = 0; j < input_size; j++){
+            for (int k = 0; k < input_channels; k++){
+                input[i][j][k] = quantize(input[i][j][k], input_scale, input_zero_point);
+            }
+        }
+    }
+    for (int l = 0; l < conv2d_1_weights_num; l++){
+        for (int i = 0; i < conv2d_1_weights_size; i++){
+            for (int j = 0; j < conv2d_1_weights_size; j++){
+                for (int k = 0; k < conv2d_1_weights_channels; k++){
+                    conv2d_1_weights[i][j][k][l] = quantize(conv2d_1_weights[i][j][k][l], conv2d_1_weights_scale, conv2d_1_weights_zero_point);
+                }
+            }
+        }
+    }
+
+    // Normalized fraction the conv2d_1_multiplier
+    int conv2d_1_fraction;
+    int conv2d_1_exponent;
+    frexp_function(conv2d_1_multiplier, &conv2d_1_fraction, &conv2d_1_exponent);
 
     // Copy input to padded input
     static const int padded_size = 225;
@@ -565,6 +604,7 @@ void conv2d_1() {
                         }
                     }
                 }
+                conv2d_1_output[i][j][k] = conv2d_1_output[i][j][k] * conv2d_1_fraction * pow(2, conv2d_1_exponent) + conv2d_1_output_zero_point;
                 conv2d_1_output[i][j][k] += conv2d_1_biases[k];
             }
         }
@@ -585,7 +625,7 @@ void dw1(){
             }
         }
     }
-    // Copy conv2d_1_output to padded conv2d_1_output
+    // Copy conv2d_1_output to padded conv2d_1_output 
     for (int k = 0; k < dw1_weights_channels; k++){
         for (int i = 1; i < conv2d_1_output_size-1; i++) {
             for (int j = 1; j < conv2d_1_output_size-1; j++) {
