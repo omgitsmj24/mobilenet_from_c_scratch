@@ -38,7 +38,8 @@ uint8_t conv2d_1_output[112][112][16];
 #define dw1_weights_num 1
 #define dw1_weights_stride 1
 #define dw1_weights_padding 1
-#define dw1_output_size 112
+#define dw1_weights_scale 0.6798206567764282 
+#define dw1_weights_zero_point 47
 
 #define dw1_bias_scale 0.44863349199295044 
 #define dw1_bias_zero_point 0
@@ -550,10 +551,6 @@ void init_input() {
     printf("Size of input: %d x %d x %d \n", LEN(input), LEN(input[0]), LEN(input[0][0]));
     printf("First element of input: %d\n", input[0][0][0]);
     printf("Second element of input: %d\n", input[1][0][0]);
-}
-
-int MaskIfLessThan(int a, int b){
-
 }
 
 void conv2d_1() {
