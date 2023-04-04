@@ -39,7 +39,15 @@ uint8_t conv2d_1_output[112][112][16];
 #define dw1_weights_stride 1
 #define dw1_weights_padding 1
 #define dw1_output_size 112
-int dw1_output[112][112][16];
+
+#define dw1_bias_scale 0.44863349199295044 
+#define dw1_bias_zero_point 0
+
+#define dw1_output_size 112
+#define dw1_output_scale 0.7595527172088623 
+#define dw1_output_zero_point 0
+
+uint8_t dw1_output[112][112][16];
 
 //pw1 112x112x16
 #define pw1_weights_size 1
@@ -541,9 +549,12 @@ void init_input() {
     //Print first element of input
     printf("Size of input: %d x %d x %d \n", LEN(input), LEN(input[0]), LEN(input[0][0]));
     printf("First element of input: %d\n", input[0][0][0]);
+    printf("Second element of input: %d\n", input[1][0][0]);
 }
 
+int MaskIfLessThan(int a, int b){
 
+}
 
 void conv2d_1() {
 
@@ -568,7 +579,6 @@ void conv2d_1() {
             }
         }
     }
-
     // Copy input to padded input
     for (int k = 0; k < input_channels; k++){
         for (int i = 0; i < input_size; i++) {
@@ -580,29 +590,49 @@ void conv2d_1() {
 
     printf("Size of padded input: %d x %d x %d \n", LEN(input_padded), LEN(input_padded[0]), LEN(input_padded[0][0]));
 
-    int32_t pre_conv2d_output_1[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
+    int32_t conv2d_output_1_32[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
+    int64_t conv2d_output_1_64[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
+    uint8_t conv2d_output_1[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
+
+    printf("First element of conv2d_1_weights: %d\n", conv2d_1_weights[0][0][0][0]);
+    printf("Second element of conv2d_1_weights: %d\n", conv2d_1_weights[1][0][0][0]);
     // Compute Conv2d_1
     for (int k = 0; k < conv2d_1_weights_num; k++){
         for (int i = 0; i < conv2d_1_output_size; i++) {
             for (int j = 0; j < conv2d_1_output_size; j++) {
-                pre_conv2d_output_1[i][j][k] = 0;
+                conv2d_output_1_32[i][j][k] = 0;
                 for (int l = 0; l < conv2d_1_weights_channels; l++) {
                     for (int m = 0; m < conv2d_1_weights_size; m++) {
                         for (int n = 0; n < conv2d_1_weights_size; n++) {
-                            pre_conv2d_output_1[i][j][k] += input_padded[i*conv2d_1_weights_stride + m][j*conv2d_1_weights_stride + n][l] * conv2d_1_weights[m][n][l][k];
+                            conv2d_output_1_32[i][j][k] += input_padded[i*conv2d_1_weights_stride + m][j*conv2d_1_weights_stride + n][l] * conv2d_1_weights[m][n][l][k];
                         }
                     }
                 }
-                pre_conv2d_output_1[i][j][k] += conv2d_1_biases[k];
-                pre_conv2d_output_1[i][j][k] = pre_conv2d_output_1[i][j][k] * conv2d_1_fraction_int32 /(1ll << 31) * (1ll << conv2d_1_exponent);
+                conv2d_output_1_32[i][j][k] += conv2d_1_biases[k];
+
+                // Fixed point multiplication by the quantized multiplier
+                conv2d_output_1_64[i][j][k] = (int64_t)(conv2d_output_1_32[i][j][k]); //Cast 32bit to 64bit
+                int64_t conv2d_1_fraction_int64 = (int64_t)(conv2d_1_fraction_int32);
+
+                int64_t mul_res_64 = conv2d_output_1_64[i][j][k] * conv2d_1_fraction_int64;
+                int32_t nudge = (mul_res_64 > 0) ? (1 << 30) : (1 - (1 << 30));
+                conv2d_output_1_32[i][j][k] = (int32_t)((mul_res_64 + nudge) / (1ll << 31)); //Cast back to 32bit which take only the high 32bit
+
+                // The multiplication by 2^(-n)
+                conv2d_output_1[i][j][k] = conv2d_output_1_32[i][j][k] / (1 << (-conv2d_1_exponent));
+                // printf("conv2d_output_1[%d][%d][%d]: %d \n", i, j, k, conv2d_output_1[i][j][k]);
             }
         }
     }
-    printf("First element of conv2d_1_output: %d\n", pre_conv2d_output_1[0][0][0]);
-    printf("Size of conv2d_1_output: %d x %d x %d \n\n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
+    printf("First element of conv2d_1_output: %d\n", conv2d_output_1[0][0][0]);
+    printf("Second element of conv2d_1_output: %d\n", conv2d_output_1[1][0][0]);
+    printf("Size of conv2d_1_output: %d x %d x %d \n\n", LEN(conv2d_output_1), LEN(conv2d_output_1[0]), LEN(conv2d_output_1[0][0]));
 }
 
 void dw1(){
+
+    //Calculate dw2_multiplier
+    const float dw2_multiplier;
 
     // Initialize padded conv2d_1_output as 0 array
     static const int conv2d_1_output_padded_size = 114;
