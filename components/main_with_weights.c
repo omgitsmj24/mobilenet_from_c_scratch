@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+#include <limits.h>
 #include "external/weights.h"
 #include "external/input.h"
 
@@ -21,7 +23,7 @@
 #define conv2d_1_weights_stride 2
 #define conv2d_1_weights_padding (1.0/2.0)
 #define conv2d_1_weights_scale 0.14435869455337524 
-#define conv2d_1_weights_zero_point 99
+#define conv2d_1_weights_zero_point -99
 
 #define conv2d_1_bias_scale 0.0011366826947778463 
 #define conv2d_1_bias_zero_point 0
@@ -39,7 +41,7 @@ uint8_t conv2d_1_output[112][112][16];
 #define dw1_weights_stride 1
 #define dw1_weights_padding 1
 #define dw1_weights_scale 0.6798206567764282 
-#define dw1_weights_zero_point 47
+#define dw1_weights_zero_point -47
 
 #define dw1_bias_scale 0.44863349199295044 
 #define dw1_bias_zero_point 0
@@ -56,13 +58,25 @@ uint8_t dw1_output[112][112][16];
 #define pw1_weights_num 16
 #define pw1_weights_stride 1
 #define pw1_weights_padding 0
+#define pw1_weights_scale 0.0181131511926651 
+#define pw1_weights_zero_point -121
+
+#define pw1_bias_scale 0.01375789288431406 
+#define pw1_bias_zero_point 0
+
 #define pw1_output_size 112
-int pw1_output[112][112][16];
+#define pw1_output_scale 2.7218637466430664 
+#define pw1_output_zero_point -127
+
+uint8_t pw1_output[112][112][16];
 
 //Add_1 112x112x16
 #define add_1_output_size 112
 #define add_1_output_channels 16
-int add_1_output[112][112][16];
+#define add_1_output_scale 2.807014226913452 
+#define add_1_output_zero_point -119
+
+uint8_t add_1_output[112][112][16];
 
 //Conv2d_2 112x112x64
 #define conv2d_2_weights_size 1
@@ -546,8 +560,38 @@ void frexp_function(float multiplier, float *fraction, int *exponent) {
     *fraction = frexp(multiplier, &(*exponent));
 }
 
-int fixed_point_multipilier(int32_t output_32[][][], int64_t output_64[][][], uint32_t layer_fraction_32, uint8_t layer_exponent){
+int divide_by_power_of_two(int x, int n) {
+    int result = x >> n;  // perform the division
+    if (x & ((1 << n) - 1)) {  // check if the LSB is 1
+        result |= 1;           // round up if needed
+    }
+    return result;
+}
 
+int32_t fixed_point_multipilier(int32_t output_32, int32_t layer_fraction_32, int8_t layer_exponent){
+    // Cast to 64 bit
+    int64_t output_64 = (int64_t)output_32;
+    int64_t layer_fraction_64 = (int64_t)layer_fraction_32;
+
+    //Fixed point multiplication by the quantized multiplier
+    int64_t mul_64 = output_64 * layer_fraction_64;
+    int32_t nudge = (mul_64 > 0) ? (1 << 30) : (1 - (1 << 30));
+    output_32 = (int32_t)((mul_64 + nudge) / (1ll << 31));
+
+    // rounding half away from zero and arithmetic right shift
+    output_32 = divide_by_power_of_two(output_32, (-layer_exponent));
+    
+    return output_32;
+}
+
+// Saturate the output to the range of uint8_t
+uint8_t saturate(int32_t output_32) {
+    if (output_32 > 255) {
+        output_32 = 255;
+    } else if (output_32 < 0) {
+        output_32 = 0;
+    }
+    return (uint8_t)output_32;
 }
 
 void init_input() {
@@ -592,10 +636,10 @@ void conv2d_1() {
     printf("Size of padded input: %d x %d x %d \n", LEN(input_padded), LEN(input_padded[0]), LEN(input_padded[0][0]));
 
     int32_t conv2d_output_1_32[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
-    int64_t conv2d_output_1_64[conv2d_1_output_size][conv2d_1_output_size][conv2d_1_weights_num];
 
     printf("First element of conv2d_1_weights: %d\n", conv2d_1_weights[0][0][0][0]);
     printf("Second element of conv2d_1_weights: %d\n", conv2d_1_weights[1][0][0][0]);
+
     // Compute Conv2d_1
     for (int k = 0; k < conv2d_1_weights_num; k++){
         for (int i = 0; i < conv2d_1_output_size; i++) {
@@ -609,21 +653,24 @@ void conv2d_1() {
                     }
                 }
                 conv2d_output_1_32[i][j][k] += conv2d_1_biases[k];
+                conv2d_output_1_32[i][j][k] = fixed_point_multipilier(conv2d_output_1_32[i][j][k], conv2d_1_fraction_int32, conv2d_1_exponent);
 
-                // Fixed point multiplication by the quantized multiplier
-                conv2d_output_1_64[i][j][k] = (int64_t)(conv2d_output_1_32[i][j][k]); //Cast 32bit to 64bit
-                int64_t conv2d_1_fraction_int64 = (int64_t)(conv2d_1_fraction_int32);
+                conv2d_1_output[i][j][k] = (uint8_t)(conv2d_output_1_32[i][j][k]);
 
-                int64_t mul_res_64 = conv2d_output_1_64[i][j][k] * conv2d_1_fraction_int64;
-                int32_t nudge = (mul_res_64 > 0) ? (1 << 30) : (1 - (1 << 30));
-                conv2d_output_1_32[i][j][k] = (int32_t)((mul_res_64 + nudge) / (1ll << 31)); //Cast back to 32bit which take only the high 32bit
+                //Add zero point
+                conv2d_1_output[i][j][k] = conv2d_1_output[i][j][k] + conv2d_1_output_zero_point;
 
-                // The multiplication by 2^(-n)
-                conv2d_1_output[i][j][k] = conv2d_output_1_32[i][j][k] / (1 << (-conv2d_1_exponent));
-                // printf("conv2d_output_1[%d][%d][%d]: %d \n", i, j, k, conv2d_output_1[i][j][k]);
+                //Saturate
+                if (conv2d_1_output[i][j][k] < 0) {
+                    conv2d_1_output[i][j][k] = 0;
+                } else if (conv2d_1_output[i][j][k] > 255) {
+                    conv2d_1_output[i][j][k] = 255;
+                }
             }
         }
     }
+    printf("First element of conv2d_output_1_32: %d\n", conv2d_output_1_32[0][0][0]);
+    printf("Second element of conv2d_output_1_32: %d\n", conv2d_output_1_32[1][0][0]);
     printf("First element of conv2d_1_output: %d\n", conv2d_1_output[0][0][0]);
     printf("Second element of conv2d_1_output: %d\n", conv2d_1_output[1][0][0]);
     printf("Size of conv2d_1_output: %d x %d x %d \n\n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
@@ -631,19 +678,19 @@ void conv2d_1() {
 
 void dw1(){
 
-    //Calculate dw2_multiplier
-    const float dw2_multiplier = conv2d_1_output_scale * dw1_weights_scale / dw1_output_scale;
+    //Calculate dw1_multiplier
+    const float dw1_multiplier = conv2d_1_output_scale * dw1_weights_scale / dw1_output_scale;
 
     // Normalized fraction and exponent the dw2_multiplier
     float dw1_fraction;
     int dw1_exponent;
-    frexp_function(dw2_multiplier, &dw1_fraction, &dw1_exponent);
+    frexp_function(dw1_multiplier, &dw1_fraction, &dw1_exponent);
     int dw1_fraction_int32 = dw1_fraction * (1ll << 31);
-    printf("conv2d_1_multiplier = %f = %d * 2^%d\n", dw2_multiplier, dw1_fraction_int32, dw1_exponent);
+    printf("dw1_multiplier = %f = %d * 2^%d\n", dw1_multiplier, dw1_fraction_int32, dw1_exponent);
 
     // Initialize padded conv2d_1_output as 0 array
     static const int conv2d_1_output_padded_size = 114;
-    static int conv2d_1_output_padded[114][114][conv2d_1_weights_num];
+    static uint8_t conv2d_1_output_padded[114][114][conv2d_1_weights_num];
     for (int k = 0; k < dw1_weights_channels; k++){
         for (int i = 0; i < conv2d_1_output_padded_size; i++) {
             for (int j = 0; j < conv2d_1_output_padded_size; j++) {
@@ -663,63 +710,181 @@ void dw1(){
     // printf("Size of conv2d_1_output: %d x %d x %d \n", LEN(conv2d_1_output), LEN(conv2d_1_output[0]), LEN(conv2d_1_output[0][0]));
     printf("Size of padded conv2d_1_output: %d x %d x %d \n", LEN(conv2d_1_output_padded), LEN(conv2d_1_output_padded[0]), LEN(conv2d_1_output_padded[0][0]));
 
-    int32_t dw1_output_1_32[dw1_output_size][dw1_output_size][dw1_weights_channels];
-    int64_t dw1_output_1_64[dw1_output_size][dw1_output_size][dw1_weights_channels];
+    int32_t dw1_output_32[dw1_output_size][dw1_output_size][dw1_weights_channels];
+
+    printf("First element of dw1_weights: %d\n", dw1_weights[0][0][0][0]);
+    printf("Second element of dw1_weights: %d\n", dw1_weights[1][0][0][0]);
 
     // Perform dw1
     for (int k = 0; k < dw1_weights_channels; k++){
         for (int i = 0; i < dw1_output_size; i++) {
             for (int j = 0; j < dw1_output_size; j++) {
-                dw1_output_1_32[i][j][k] = 0;
+                dw1_output_32[i][j][k] = 0;
                 for (int l = 0; l < dw1_weights_channels; l++) {
                     for (int m = 0; m < dw1_weights_size; m++) {
                         for (int n = 0; n < dw1_weights_size; n++) {
-                            dw1_output_1_32[i][j][k] += conv2d_1_output_padded[i*dw1_weights_stride + m][j*dw1_weights_stride + n][l] * dw1_weights[m][n][l][k];
+                            dw1_output_32[i][j][k] += conv2d_1_output_padded[i*dw1_weights_stride + m][j*dw1_weights_stride + n][l] * dw1_weights[m][n][l][k];
                         }
                     }
                 }
-                dw1_output_1_32[i][j][k] += dw1_biases[k];
+                dw1_output_32[i][j][k] += dw1_biases[k];
+                dw1_output_32[i][j][k] = fixed_point_multipilier(dw1_output_32[i][j][k], dw1_fraction_int32, dw1_exponent);
+
+                dw1_output[i][j][k] = (uint8_t)(dw1_output_32[i][j][k]);
+
+                //Add zero point to dw1_output
+                dw1_output[i][j][k] += dw1_output_zero_point;
+
+                //Saturate
+                if (dw1_output[i][j][k] > 255){
+                    dw1_output[i][j][k] = 255;
+                }
+                else if (dw1_output[i][j][k] < 0){
+                    dw1_output[i][j][k] = 0;
+                }
             }
         }
     }
+    printf("First element of dw1_output_1_32: %d\n", dw1_output_32[0][0][0]);
+    printf("Second element of dw1_output_1_32: %d\n", dw1_output_32[1][0][0]);
     printf("First element of dw1_output: %d\n", dw1_output[0][0][0]);
-    printf("Size of dw1_output: %d x %d x %d \n", LEN(dw1_output), LEN(dw1_output[0]), LEN(dw1_output[0][0]));
+    printf("Second element of dw1_output: %d\n", dw1_output[1][0][0]);
+    printf("Size of dw1_output: %d x %d x %d \n\n", LEN(dw1_output), LEN(dw1_output[0]), LEN(dw1_output[0][0]));
 }
 
 void pw1(){
 
+    // Calculate the pw1_multiplier
+    const float pw1_multiplier = dw1_output_scale * pw1_weights_scale / pw1_output_scale;
+
+    // Normalized fraction and exponent the pw1_multiplier
+    float pw1_fraction;
+    int pw1_exponent;
+    frexp_function(pw1_multiplier, &pw1_fraction, &pw1_exponent);
+    int pw1_fraction_int32 = pw1_fraction * (1ll << 31);
+    printf("pw1_multiplier = %f = %d * 2^%d\n", pw1_multiplier, pw1_fraction_int32, pw1_exponent);
+
+    int32_t pw1_output_32[pw1_output_size][pw1_output_size][pw1_weights_num];
+
+    printf("First element of pw1_weights: %d\n", pw1_weights[0][0][0][0]);
+    printf("Second element of pw1_weights: %d\n", pw1_weights[1][0][0][0]);
+
+    // Perform pw1
     for(int k = 0; k < pw1_weights_num; k++){
         for (int i = 0; i < pw1_output_size; i++) {
             for (int j = 0; j < pw1_output_size; j++) {
-                pw1_output[i][j][k] = 0;
+                pw1_output_32[i][j][k] = 0;
                 for (int l = 0; l < pw1_weights_channels; l++) {
                     for (int m = 0; m < pw1_weights_size; m++) {
                         for (int n = 0; n < pw1_weights_size; n++) {
-                            pw1_output[i][j][k] += dw1_output[i*pw1_weights_stride + m][j*pw1_weights_stride + n][l] * pw1_weights[m][n][l][k];
+                            pw1_output_32[i][j][k] += dw1_output[i*pw1_weights_stride + m][j*pw1_weights_stride + n][l] * pw1_weights[m][n][l][k];
                         }
                     }
                 }
-                pw1_output[i][j][k] += pw1_biases[k];
+                pw1_output_32[i][j][k] += pw1_biases[k];
+                pw1_output_32[i][j][k] = fixed_point_multipilier(pw1_output_32[i][j][k], pw1_fraction_int32, pw1_exponent);
+                
+                pw1_output[i][j][k] = (uint8_t)pw1_output_32[i][j][k];
+
+                //Add zero point to pw1_output
+                pw1_output[i][j][k] += pw1_output_zero_point;
+
+                //Saturate
+                if (pw1_output[i][j][k] < 0) {
+                    pw1_output[i][j][k] = 0;
+                } else if (pw1_output[i][j][k] > 255) {
+                    pw1_output[i][j][k] = 255;
+                }
             }
         }
     }
+    printf("First element of pw1_output_1_32: %d\n", pw1_output_32[0][0][0]);
+    printf("Second element of pw1_output_1_32: %d\n", pw1_output_32[1][0][0]);
     printf("First element of pw1_output: %d\n", pw1_output[0][0][0]);
-    printf("Size of pw1_output: %d x %d x %d \n", LEN(pw1_output), LEN(pw1_output[0]), LEN(pw1_output[0][0]));
-
+    printf("Second element of pw1_output: %d\n", pw1_output[1][0][0]);
+    printf("Size of pw1_output: %d x %d x %d \n\n", LEN(pw1_output), LEN(pw1_output[0]), LEN(pw1_output[0][0]));
 }
 
 void add_1() {
+
+    // Calculate the input and output new scale
+    const float add_1_input_1_scale = 0.5;
+    const int add_1_input_1_zero_point = pw1_output_zero_point;
+    const float add_1_input_2_scale = conv2d_1_output_scale / (2 * pw1_output_scale);
+    const int add_1_input_2_zero_point = conv2d_1_output_zero_point;
+    const float add_1_output_scale_new = 2 * pw1_output_scale / add_1_output_scale;
+
+    // Normalized fraction and exponent the add_1_input_1_scale
+    float add_1_input_1_scale_fraction;
+    int add_1_input_1_scale_exponent;
+    frexp_function(add_1_input_1_scale, &add_1_input_1_scale_fraction, &add_1_input_1_scale_exponent);
+    int add_1_input_1_scale_fraction_int32 = add_1_input_1_scale_fraction * (1ll << 31);
+    printf("add_1_input_1_scale = %f = %d * 2^%d\n", add_1_input_1_scale, add_1_input_1_scale_fraction_int32, add_1_input_1_scale_exponent);
+
+    // Normalized fraction and exponent the add_1_input_2_scale
+    float add_1_input_2_scale_fraction;
+    int add_1_input_2_scale_exponent;
+    frexp_function(add_1_input_2_scale, &add_1_input_2_scale_fraction, &add_1_input_2_scale_exponent);
+    int add_1_input_2_scale_fraction_int32 = add_1_input_2_scale_fraction * (1ll << 31);
+    printf("add_1_input_2_scale = %f = %d * 2^%d\n", add_1_input_2_scale, add_1_input_2_scale_fraction_int32, add_1_input_2_scale_exponent);
+
+    // Normalized fraction and exponent the add_1_output_scale_new
+    float add_1_output_scale_new_fraction;
+    int add_1_output_scale_new_exponent;
+    frexp_function(add_1_output_scale_new / (1 << 20), &add_1_output_scale_new_fraction, &add_1_output_scale_new_exponent);
+    int add_1_output_scale_new_fraction_int32 = add_1_output_scale_new_fraction * (1ll << 31);
+    printf("add_1_output_scale_new = %f = %d * 2^%d\n", add_1_output_scale_new, add_1_output_scale_new_fraction_int32, add_1_output_scale_new_exponent);
+
+    int32_t add_1_input_1[add_1_output_size][add_1_output_size][add_1_output_channels];
+    int32_t add_1_input_2[add_1_output_size][add_1_output_size][add_1_output_channels];
+    int32_t add_1_output_1_32[add_1_output_size][add_1_output_size][add_1_output_channels];
+    
     for (int i = 0; i < add_1_output_size; i++) {
         for (int j = 0; j < add_1_output_size; j++) {
             for (int k = 0; k < add_1_output_channels; k++) {
-                add_1_output[i][j][k] = pw1_output[i][j][k] + conv2d_1_output[i][j][k];
-                // printf("%f ", add_1_output[i][j][k]);
-            }
-            // printf("\n");
+                add_1_input_1[i][j][k] = pw1_output[i][j][k];
+                add_1_input_2[i][j][k] = conv2d_1_output[i][j][k];
+            }   
         }
-        // printf("\n");
     }
+    printf("add_1_input_1[%d][%d][%d] = %d\n", 0, 0, 0, add_1_input_1[0][0][0]);
+    printf("add_1_input_1[%d][%d][%d] = %d\n", 1, 0, 0, add_1_input_1[1][0][0]);
+
+    printf("add_1_input_2[%d][%d][%d] = %d\n", 0, 0, 0, add_1_input_2[0][0][0]);
+    printf("add_1_input_2[%d][%d][%d] = %d\n", 1, 0, 0, add_1_input_2[1][0][0]);
+    // Perform add_1    
+    for (int i = 0; i < add_1_output_size; i++) {
+        for (int j = 0; j < add_1_output_size; j++) {
+            for (int k = 0; k < add_1_output_channels; k++) {
+
+                // Add zero point
+                add_1_input_1[i][j][k] = add_1_input_1[i][j][k] + add_1_input_1_zero_point;
+                add_1_input_2[i][j][k] = add_1_input_2[i][j][k] + add_1_input_2_zero_point;
+
+                // Left shift the input
+                add_1_input_1[i][j][k] = add_1_input_1[i][j][k] * (1 << 20);
+                add_1_input_2[i][j][k] = add_1_input_2[i][j][k] * (1 << 20);
+
+                // Fixed point multiplier
+                add_1_input_1[i][j][k] = fixed_point_multipilier(add_1_input_1[i][j][k], add_1_input_1_scale_fraction_int32, add_1_input_1_scale_exponent);
+                add_1_input_2[i][j][k] = fixed_point_multipilier(add_1_input_2[i][j][k], add_1_input_2_scale_fraction_int32, add_1_input_2_scale_exponent);
+                add_1_output_1_32[i][j][k] = add_1_input_1[i][j][k] + add_1_input_2[i][j][k];
+
+                // Fixed point multiplier
+                add_1_output_1_32[i][j][k] = fixed_point_multipilier(add_1_output_1_32[i][j][k], add_1_output_scale_new_fraction_int32, add_1_output_scale_new_exponent);
+
+                // Add zero point to add_1_output
+                add_1_output_1_32[i][j][k] = add_1_output_1_32[i][j][k] - add_1_output_zero_point;
+                
+                // Saturate the output
+                add_1_output[i][j][k] = saturate(add_1_output_1_32[i][j][k]);
+            }   
+        }
+    }
+    printf("First element of add_1_output_1_32: %d\n", add_1_output_1_32[0][0][0]);
+    printf("Second element of add_1_output_1_32: %d\n", add_1_output_1_32[1][0][0]);
     printf("First element of add_1_output: %d\n", add_1_output[0][0][0]);
+    printf("Second element of add_1_output: %d\n", add_1_output[1][0][0]);
     printf("Size of add_1_output: %d x %d x %d \n", LEN(add_1_output), LEN(add_1_output[0]), LEN(add_1_output[0][0]));
 }
 
@@ -2195,11 +2360,12 @@ void softmax(){
 }
 
 int main (){
+    clock_t start_time = clock();
     init_input();
     conv2d_1();
-    // dw1();
-    // pw1();
-    // add_1();
+    dw1();
+    pw1();
+    add_1();
     // conv2d_2();
     // dw2();
     // pw2();
@@ -2260,5 +2426,7 @@ int main (){
     // conv2d_18();
     // reshape();
     // softmax();
+    double elapsed_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
+    printf("Done in %f seconds\n", elapsed_time);
     return 0;
 }
