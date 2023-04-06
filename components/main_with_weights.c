@@ -954,7 +954,7 @@ void conv2d_2(){
     printf("Second element of conv2d_2_output_32: %d\n", conv2d_2_output_32[1][0][0]);
     printf("First element of conv2d_2_output: %d\n", conv2d_2_output[0][0][0]);
     printf("Second element of conv2d_2_output: %d\n", conv2d_2_output[1][0][0]);
-    printf("Size of conv2d_2_output: %d x %d x %d \n", LEN(conv2d_2_output), LEN(conv2d_2_output[0]), LEN(conv2d_2_output[0][0]));
+    printf("Size of conv2d_2_output: %d x %d x %d \n\n", LEN(conv2d_2_output), LEN(conv2d_2_output[0]), LEN(conv2d_2_output[0][0]));
 }
 
 void dw2(){
@@ -966,6 +966,8 @@ void dw2(){
     float dw2_fraction;
     int dw2_exponent;
     frexp_function(dw2_multiplier, &dw2_fraction, &dw2_exponent);
+    int dw2_fraction_int32 = dw2_fraction * (1ll << 31);
+    printf("dw2_multiplier = %f = %d * 2^%d\n", dw2_multiplier, dw2_fraction_int32, dw2_exponent);
     
 
     // Initialize padded conv2d_2_output as 0 array
@@ -988,6 +990,11 @@ void dw2(){
         }
     }
 
+    int32_t dw2_output_32[dw2_output_size][dw2_output_size][dw2_weights_channels];
+
+    printf("First element of dw2_weights: %d\n", dw2_weights[0][0][0][0]);
+    printf("Second element of dw2_weights: %d\n", dw2_weights[1][0][0][0]);
+
     printf("Size of padded conv2d_2_output: %d x %d x %d \n", LEN(conv2d_2_output_padded), LEN(conv2d_2_output_padded[0]), LEN(conv2d_2_output_padded[0][0]));
 
     // Perform dw2
@@ -995,19 +1002,36 @@ void dw2(){
         for (int i = 0; i < dw2_output_size; i++) {
             for (int j = 0; j < dw2_output_size; j++) {
                 for (int l = 0; l < dw2_weights_channels; l++) {
-                    dw2_output[i][j][l] = 0;
+                    dw2_output_32[i][j][l] = 0;
                     for (int m = 0; m < dw2_weights_size; m++) {
                         for (int n = 0; n < dw2_weights_size; n++) {
-                            dw2_output[i][j][l] += conv2d_2_output_padded[i*dw2_weights_stride + m][j*dw2_weights_stride + n][l] * dw2_weights[m][n][l][k];
+                            dw2_output_32[i][j][l] += conv2d_2_output_padded[i*dw2_weights_stride + m][j*dw2_weights_stride + n][l] * dw2_weights[m][n][l][k];
                         }
                     }
-                    dw2_output[i][j][l] += dw2_biases[l];
+                    dw2_output_32[i][j][l] += dw2_biases[l];
+
+                    dw2_output_32[i][j][l] = fixed_point_multipilier(dw2_output_32[i][j][l], dw2_fraction_int32, dw2_exponent);
+
+                    // Cast to uint8_t
+                    dw2_output[i][j][l] = (uint8_t)dw2_output_32[i][j][l];
+
+                    // Add zero point 
+                    dw2_output[i][j][l] = dw2_output[i][j][l] - dw2_output_zero_point;
+
+                    // Saturate
+                    if (dw2_output[i][j][l] < 0) {
+                        dw2_output[i][j][l] = 0;
+                    } else if (dw2_output[i][j][l] > 255) {
+                        dw2_output[i][j][l] = 255;
+                    }
                 }
             }
         }
     }
-
+    printf("First element of dw2_output_32: %d\n", dw2_output_32[0][0][0]);
+    printf("Second element of dw2_output_32: %d\n", dw2_output_32[1][0][0]);
     printf("First element of dw2_output: %d\n", dw2_output[0][0][0]);
+    printf("Second element of dw2_output: %d\n", dw2_output[1][0][0]);
     printf("Size of dw2_output: %d x %d x %d \n", LEN(dw2_output), LEN(dw2_output[0]), LEN(dw2_output[0][0]));
 }
 
@@ -2424,7 +2448,7 @@ int main (){
     pw1();
     add_1();
     conv2d_2();
-    // dw2();
+    dw2();
     // pw2();
     // conv2d_3();
     // dw3();
