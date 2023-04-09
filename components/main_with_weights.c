@@ -120,17 +120,35 @@ uint8_t dw2_output[56][56][64];
 #define pw2_weights_num 24
 #define pw2_weights_stride 1
 #define pw2_weights_padding 0
-#define pw2_output_size 56
-int pw2_output[56][56][24];
+#define pw2_weights_scale 0.012059011496603489 
+#define pw2_weights_zero_point -125
 
-//Conv2d_3 56x56x72
+#define pw2_bias_scale 0.007966741919517517 
+#define pw2_bias_zero_point 0
+
+#define pw2_output_size 56
+#define pw2_output_scale 1.0728049278259277 
+#define pw2_output_zero_point -131
+
+uint8_t pw2_output[56][56][24];
+
+//conv2d_3 56x56x72
 #define conv2d_3_weights_size 1
 #define conv2d_3_weights_channels 24
 #define conv2d_3_weights_num 72
 #define conv2d_3_weights_stride 1
 #define conv2d_3_weights_padding 0
+#define conv2d_3_weights_scale 0.0045080468989908695 
+#define conv2d_3_weights_zero_point -138
+
+#define conv2d_3_bias_scale 0.004836254753172398 
+#define conv2d_3_bias_zero_point 0
+
 #define conv2d_3_output_size 56
-int conv2d_3_output[56][56][72];
+#define conv2d_3_output_scale 0.2640864849090576 
+#define conv2d_3_output_zero_point 0
+
+uint8_t conv2d_3_output[56][56][72];
 
 //dw3 56x56x72
 #define dw3_weights_size 3
@@ -138,8 +156,17 @@ int conv2d_3_output[56][56][72];
 #define dw3_weights_num 1
 #define dw3_weights_stride 1
 #define dw3_weights_padding 1
+#define dw3_weights_scale 0.03428956866264343 
+#define dw3_weights_zero_point -96
+
+#define dw3_bias_scale 0.009055412374436855 
+#define dw3_bias_zero_point 0
+
 #define dw3_output_size 56
-int dw3_output[56][56][72];
+#define dw3_output_scale 0.26957252621650696 
+#define dw3_output_zero_point 0
+
+uint8_t dw3_output[56][56][72];
 
 //pw3 56x56x24
 #define pw3_weights_size 1
@@ -147,13 +174,24 @@ int dw3_output[56][56][72];
 #define pw3_weights_num 24
 #define pw3_weights_stride 1
 #define pw3_weights_padding 0
+#define pw3_weights_scale 0.02138252928853035 
+#define pw3_weights_zero_point -135
+
+#define pw3_bias_scale 0.005764142610132694 
+#define pw3_bias_zero_point 0
+
 #define pw3_output_size 56
-int pw3_output[56][56][24];
+#define pw3_output_scale 1.1904277801513672 
+#define pw3_output_zero_point -131
+
+uint8_t pw3_output[56][56][24];
 
 //Add_2 56x56x24
 #define add_2_output_size 56
 #define add_2_output_channels 24
-int add_2_output[56][56][24];
+#define add_2_output_scale 1.1451550722122192 
+#define add_2_output_zero_point -127
+uint8_t add_2_output[56][56][24];
 
 //Conv2d_4 56x56x72
 #define conv2d_4_weights_size 1
@@ -161,8 +199,16 @@ int add_2_output[56][56][24];
 #define conv2d_4_weights_num 72
 #define conv2d_4_weights_stride 1
 #define conv2d_4_weights_padding 0
+#define conv2d_4_weights_scale 0.0025988302659243345 
+#define conv2d_4_weights_zero_point -130
+
+#define conv2d_4_bias_scale 0.002976063871756196 
+#define conv2d_4_bias_zero_point 0
+
 #define conv2d_4_output_size 56
-int conv2d_4_output[56][56][72];
+#define conv2d_4_output_scale 0.2561696767807007 
+#define conv2d_4_output_zero_point 0
+uint8_t conv2d_4_output[56][56][72];
 
 //dw4 28x28x72
 #define dw4_weights_size 3
@@ -170,8 +216,17 @@ int conv2d_4_output[56][56][72];
 #define dw4_weights_num 1
 #define dw4_weights_stride 2
 #define dw4_weights_padding (1.0/2.0)
+#define dw4_weights_scale 0.03551362082362175 
+#define dw4_weights_zero_point -151
+
+#define dw4_bias_scale 0.009097511880099773 
+#define dw4_bias_zero_point 0
+
 #define dw4_output_size 28
-int dw4_output[28][28][72];
+#define dw4_output_scale 0.23036204278469086 
+#define dw4_output_zero_point 0
+
+uint8_t dw4_output[28][28][72];
 
 //pw4 28x28x40
 #define pw4_weights_size 1
@@ -179,8 +234,17 @@ int dw4_output[28][28][72];
 #define pw4_weights_num 40
 #define pw4_weights_stride 1
 #define pw4_weights_padding 0
+#define pw4_weights_scale 0.013196593150496483 
+#define pw4_weights_zero_point -146
+
+#define pw4_bias_scale 0.003039994277060032 
+#define pw4_bias_zero_point 0
+
 #define pw4_output_size 28
-int pw4_output[28][28][40];
+#define pw4_output_scale 0.5330838561058044 
+#define pw4_output_zero_point -137
+
+uint8_t pw4_output[28][28][40];
 
 //Conv2d_5 28x28x120
 #define conv2d_5_weights_size 1
@@ -188,8 +252,17 @@ int pw4_output[28][28][40];
 #define conv2d_5_weights_num 120
 #define conv2d_5_weights_stride 1
 #define conv2d_5_weights_padding 0
+#define conv2d_5_weights_scale 0.0030650347471237183 
+#define conv2d_5_weights_zero_point -96
+
+#define conv2d_5_bias_scale 0.0016339204739779234 
+#define conv2d_5_bias_zero_point 0
+
 #define conv2d_5_output_size 28
-int conv2d_5_output[28][28][120];
+#define conv2d_5_output_scale 0.13088467717170715 
+#define conv2d_5_output_zero_point 0
+
+uint8_t conv2d_5_output[28][28][120];
 
 //dw5 28x28x120
 #define dw5_weights_size 3
@@ -197,8 +270,17 @@ int conv2d_5_output[28][28][120];
 #define dw5_weights_num 1
 #define dw5_weights_stride 1
 #define dw5_weights_padding 1
+#define dw5_weights_scale 0.04485065117478371 
+#define dw5_weights_zero_point -108
+
+#define dw5_bias_scale 0.005870262626558542 
+#define dw5_bias_zero_point 0
+
 #define dw5_output_size 28
-int dw5_output[28][28][120];
+#define dw5_output_scale 0.1401514858007431 
+#define dw5_output_zero_point 0
+
+uint8_t dw5_output[28][28][120];
 
 //pw5 28x28x40
 #define pw5_weights_size 1
@@ -206,13 +288,24 @@ int dw5_output[28][28][120];
 #define pw5_weights_num 40
 #define pw5_weights_stride 1
 #define pw5_weights_padding 0
+#define pw5_weights_scale 0.011324976570904255 
+#define pw5_weights_zero_point -144
+
+#define pw5_bias_scale 0.0015872123185545206 
+#define pw5_bias_zero_point 0
+
 #define pw5_output_size 28
-int pw5_output[28][28][40];
+#define pw5_output_scale 0.4745807349681854 
+#define pw5_output_zero_point -130
+uint8_t pw5_output[28][28][40];
 
 //Add_3 28x28x40 
 #define add_3_output_size 28
 #define add_3_output_channels 40
-int add_3_output[28][28][40];
+#define add_3_output_scale 0.6054844260215759 
+#define add_3_output_zero_point -135
+
+uint8_t add_3_output[28][28][40];
 
 //Conv2d_6 28x28x120
 #define conv2d_6_weights_size 1
@@ -220,8 +313,17 @@ int add_3_output[28][28][40];
 #define conv2d_6_weights_num 120
 #define conv2d_6_weights_stride 1
 #define conv2d_6_weights_padding 0
+#define conv2d_6_weights_scale 0.002430431079119444 
+#define conv2d_6_weights_zero_point -117
+
+#define conv2d_6_bias_scale 0.0014715881552547216 
+#define conv2d_6_bias_zero_point 0
+
 #define conv2d_6_output_size 28
-int conv2d_6_output[28][28][120];
+#define conv2d_6_output_scale 0.11830147355794907 
+#define conv2d_6_output_zero_point 0
+
+uint8_t conv2d_6_output[28][28][120];
 
 //dw6 28x28x120
 #define dw6_weights_size 3
@@ -229,8 +331,17 @@ int conv2d_6_output[28][28][120];
 #define dw6_weights_num 1
 #define dw6_weights_stride 1
 #define dw6_weights_padding 1
+#define dw6_weights_scale 0.061444178223609924 
+#define dw6_weights_zero_point -145
+
+#define dw6_bias_scale 0.007268936838954687 
+#define dw6_bias_zero_point 0
+
 #define dw6_output_size 28
-int dw6_output[28][28][120];
+#define dw6_output_scale 0.15098942816257477 
+#define dw6_output_zero_point 0
+
+uint8_t dw6_output[28][28][120];
 
 //pw6 28x28x40
 #define pw6_weights_size 1
@@ -238,13 +349,25 @@ int dw6_output[28][28][120];
 #define pw6_weights_num 40
 #define pw6_weights_stride 1
 #define pw6_weights_padding 0
+#define pw6_weights_scale 0.018437182530760765 
+#define pw6_weights_zero_point -91
+
+#define pw6_bias_scale 0.0027838198002427816 
+#define pw6_bias_zero_point 0
+
 #define pw6_output_size 28
-int pw6_output[28][28][40];
+#define pw6_output_scale 0.6320084929466248 
+#define pw6_output_zero_point -123
+
+uint8_t pw6_output[28][28][40];
 
 //Add_4 28x28x40
 #define add_4_output_size 28
 #define add_4_output_channels 40
-int add_4_output[28][28][40];
+#define add_4_output_scale 0.6582030653953552 
+#define add_4_output_zero_point -124
+
+uint8_t add_4_output[28][28][40];
 
 //Conv2d_7 28x28x240
 #define conv2d_7_weights_size 1
@@ -252,8 +375,17 @@ int add_4_output[28][28][40];
 #define conv2d_7_weights_num 240
 #define conv2d_7_weights_stride 1
 #define conv2d_7_weights_padding 0
+#define conv2d_7_weights_scale 0.002097062300890684 
+#define conv2d_7_weights_zero_point -118
+
+#define conv2d_7_bias_scale 0.001380292815156281 
+#define conv2d_7_bias_zero_point 0
+
 #define conv2d_7_output_size 28
-int conv2d_7_output[28][28][240];
+#define conv2d_7_output_scale 0.13542133569717407 
+#define conv2d_7_output_zero_point 0
+
+uint8_t conv2d_7_output[28][28][240];
 
 //dw7 14x14x240
 #define dw7_weights_size 3
@@ -261,8 +393,17 @@ int conv2d_7_output[28][28][240];
 #define dw7_weights_num 1
 #define dw7_weights_stride 2
 #define dw7_weights_padding (1.0/2.0)
+#define dw7_weights_scale 0.031043726950883865 
+#define dw7_weights_zero_point -160
+
+#define dw7_bias_scale 0.00420398311689496 
+#define dw7_bias_zero_point 0
+
 #define dw7_output_size 14
-int dw7_output[14][14][240];
+#define dw7_output_scale 0.16882877051830292 
+#define dw7_output_zero_point 0
+
+uint8_t dw7_output[14][14][240];
 
 //pw7 14x14x80
 #define pw7_weights_size 1
@@ -270,8 +411,16 @@ int dw7_output[14][14][240];
 #define pw7_weights_num 80
 #define pw7_weights_stride 1
 #define pw7_weights_padding 0
+#define pw7_weights_scale 0.00881643034517765 
+#define pw7_weights_zero_point -115
+
+#define pw7_bias_scale 0.001488467212766409 
+#define pw7_bias_zero_point 0
+
 #define pw7_output_size 14
-int pw7_output[14][14][80];
+#define pw7_output_scale 0.3794284760951996 
+#define pw7_output_zero_point -131
+uint8_t pw7_output[14][14][80];
 
 // START - BIG NOTICE - MISSED
 
@@ -281,8 +430,16 @@ int pw7_output[14][14][80];
 #define conv2d_8_weights_num 200
 #define conv2d_8_weights_stride 1
 #define conv2d_8_weights_padding 0
+#define conv2d_8_weights_scale 0.0013372065732255578  
+#define conv2d_8_weights_zero_point -125
+
+#define conv2d_8_bias_scale 0.000507374235894531 
+#define conv2d_8_bias_zero_point 0
+
 #define conv2d_8_output_size 14
-int conv2d_8_output[14][14][200];
+#define conv2d_8_output_scale 0.065852090716362 
+#define conv2d_8_output_zero_point 0
+uint8_t conv2d_8_output[14][14][200];
 
 //dw8 14x14x200
 #define dw8_weights_size 3
@@ -290,8 +447,16 @@ int conv2d_8_output[14][14][200];
 #define dw8_weights_num 1
 #define dw8_weights_stride 1
 #define dw8_weights_padding 1
+#define dw8_weights_scale 0.07536425441503525 
+#define dw8_weights_zero_point -180
+
+#define dw8_bias_scale 0.004962894134223461 
+#define dw8_bias_zero_point 0
+
 #define dw8_output_size 14
-int dw8_output[14][14][200];
+#define dw8_output_scale 0.09319761395454407 
+#define dw8_output_zero_point 0
+uint8_t dw8_output[14][14][200];
 
 //pw8 14x14x80
 #define pw8_weights_size 1
@@ -299,47 +464,87 @@ int dw8_output[14][14][200];
 #define pw8_weights_num 80
 #define pw8_weights_stride 1
 #define pw8_weights_padding 0
+#define pw8_weights_scale 0.02751377783715725 
+#define pw8_weights_zero_point -97
+
+#define pw8_bias_scale 0.002564218593761325 
+#define pw8_bias_zero_point 0
+
 #define pw8_output_size 14
-int pw8_output[14][14][80];
+#define pw8_output_scale 0.39363622665405273 
+#define pw8_output_zero_point -165
+uint8_t pw8_output[14][14][80];
 
 // STOP - BIG NOTICE - MISSED
 
 //Add_5 14x14x80
 #define add_5_output_size 14
 #define add_5_output_channels 80
-int add_5_output[14][14][80];
+#define add_5_output_scale 0.39226800203323364 
+#define add_5_output_zero_point -134
+uint8_t add_5_output[14][14][80];
 
 //Conv2d_9 14x14x184
 #define conv2d_9_weights_size 1
 #define conv2d_9_weights_channels 80
-#define conv2d_9_weights_num 200
+#define conv2d_9_weights_num 184
 #define conv2d_9_weights_stride 1
 #define conv2d_9_weights_padding 0
+#define conv2d_9_weights_scale 0.001317909569479525 
+#define conv2d_9_weights_zero_point -124
+
+#define conv2d_9_bias_scale 0.0005169737851247191 
+#define conv2d_9_bias_zero_point 0
+
 #define conv2d_9_output_size 14
-int conv2d_9_output[14][14][200];
+#define conv2d_9_output_scale 0.065852090716362 
+#define conv2d_9_output_zero_point 0
+
+uint8_t conv2d_9_output[14][14][184];
 
 //dw8 14x14x184
 #define dw9_weights_size 3
-#define dw9_weights_channels 200
+#define dw9_weights_channels 184
 #define dw9_weights_num 1
 #define dw9_weights_stride 1
 #define dw9_weights_padding 1
+#define dw9_weights_scale 0.045743152499198914 
+#define dw9_weights_zero_point -114
+
+#define dw9_bias_scale 0.0027200994081795216 
+#define dw9_bias_zero_point 0
+
 #define dw9_output_size 14
-int dw9_output[14][14][200];
+#define dw9_output_scale 0.0917566642165184 
+#define dw9_output_zero_point 0
+
+uint8_t dw9_output[14][14][184];
 
 //pw8 14x14x80
 #define pw9_weights_size 1
-#define pw9_weights_channels 200
+#define pw9_weights_channels 184
 #define pw9_weights_num 80
 #define pw9_weights_stride 1
 #define pw9_weights_padding 0
+#define pw9_weights_scale 0.012674453668296337 
+#define pw9_weights_zero_point -104
+
+#define pw9_bias_scale 0.0011629655491560698 
+#define pw9_bias_zero_point 0
+
 #define pw9_output_size 14
-int pw9_output[14][14][80];
+#define pw9_output_scale 0.2396366447210312 
+#define pw9_output_zero_point -126
+
+uint8_t pw9_output[14][14][80];
 
 //Add_6 14x14x80
 #define add_6_output_size 14
 #define add_6_output_channels 80
-int add_6_output[14][14][80];
+#define add_6_output_scale 0.4093148112297058 
+#define add_6_output_zero_point -135
+
+uint8_t add_6_output[14][14][80];
 
 //conv2d_10 14x14x184
 #define conv2d_10_weights_size 1
@@ -347,8 +552,17 @@ int add_6_output[14][14][80];
 #define conv2d_10_weights_num 184
 #define conv2d_10_weights_stride 1
 #define conv2d_10_weights_padding 0
+#define conv2d_10_weights_scale 0.0015550317475572228 
+#define conv2d_10_weights_zero_point -139
+
+#define conv2d_10_bias_scale 0.0006364975124597549 
+#define conv2d_10_bias_zero_point 0
+
 #define conv2d_10_output_size 14
-int conv2d_10_output[14][14][184];
+#define conv2d_10_output_scale 0.06710842996835709 
+#define conv2d_10_output_zero_point 0
+
+uint8_t conv2d_10_output[14][14][184];
 
 //dw10 14x14x184
 #define dw10_weights_size 3
@@ -356,8 +570,17 @@ int conv2d_10_output[14][14][184];
 #define dw10_weights_num 1
 #define dw10_weights_stride 1
 #define dw10_weights_padding 1
+#define dw10_weights_scale 0.057766854763031006 
+#define dw10_weights_zero_point -154
+
+#define dw10_bias_scale 0.0038766430225223303 
+#define dw10_bias_zero_point 0
+
 #define dw10_output_size 14
-int dw10_output[14][14][184];
+#define dw10_output_scale 0.11187095195055008 
+#define dw10_output_zero_point 0
+
+uint8_t dw10_output[14][14][184];
 
 //pw10 14x14x80
 #define pw10_weights_size 1
@@ -365,13 +588,25 @@ int dw10_output[14][14][184];
 #define pw10_weights_num 80
 #define pw10_weights_stride 1
 #define pw10_weights_padding 0
+#define pw10_weights_scale 0.010866138152778149 
+#define pw10_weights_zero_point -122
+
+#define pw10_bias_scale 0.0012156051816418767 
+#define pw10_bias_zero_point 0
+
 #define pw10_output_size 14
-int pw10_output[14][14][80];
+#define pw10_output_scale 0.31259796023368835 
+#define pw10_output_zero_point -132
+
+uint8_t pw10_output[14][14][80];
 
 //Add_7 14x14x80
 #define add_7_output_size 14
 #define add_7_output_channels 80
-int add_7_output[14][14][80];
+#define add_7_output_scale 0.4275743067264557 
+#define add_7_output_zero_point -130
+
+uint8_t add_7_output[14][14][80];
 
 //conv2d_11 14x14x480
 #define conv2d_11_weights_size 1
@@ -379,8 +614,17 @@ int add_7_output[14][14][80];
 #define conv2d_11_weights_num 480
 #define conv2d_11_weights_stride 1
 #define conv2d_11_weights_padding 0
+#define conv2d_11_weights_scale 0.0016883378848433495 
+#define conv2d_11_weights_zero_point -105
+
+#define conv2d_11_bias_scale 0.000721889897249639 
+#define conv2d_11_bias_zero_point 0
+
 #define conv2d_11_output_size 14
-int conv2d_11_output[14][14][480];
+#define conv2d_11_output_scale 0.09170106053352356 
+#define conv2d_11_output_zero_point 0
+
+uint8_t conv2d_11_output[14][14][480];
 
 //dw11 14x14x480
 #define dw11_weights_size 3
@@ -388,8 +632,17 @@ int conv2d_11_output[14][14][480];
 #define dw11_weights_num 1
 #define dw11_weights_stride 1
 #define dw11_weights_padding 1
+#define dw11_weights_scale 0.049465809017419815
+#define dw11_weights_zero_point -134
+
+#define dw11_bias_scale 0.004536067135632038 
+#define dw11_bias_zero_point 0
+
 #define dw11_output_size 14
-int dw11_output[14][14][480];
+#define dw11_output_scale 0.15485285222530365 
+#define dw11_output_zero_point 0
+
+uint8_t dw11_output[14][14][480];
 
 //pw11 14x14x80
 #define pw11_weights_size 1
@@ -397,8 +650,17 @@ int dw11_output[14][14][480];
 #define pw11_weights_num 112
 #define pw11_weights_stride 1
 #define pw11_weights_padding 0
+#define pw11_weights_scale 0.004192234016954899 
+#define pw11_weights_zero_point -133
+
+#define pw11_bias_scale 0.0006491793901659548 
+#define pw11_bias_zero_point 0
+
 #define pw11_output_size 14
-int pw11_output[14][14][112];
+#define pw11_output_scale 0.328067809343338 
+#define pw11_output_zero_point -129
+
+uint8_t pw11_output[14][14][112];
 
 //conv2d_12 14x14x672
 #define conv2d_12_weights_size 1
@@ -406,8 +668,17 @@ int pw11_output[14][14][112];
 #define conv2d_12_weights_num 672
 #define conv2d_12_weights_stride 1
 #define conv2d_12_weights_padding 0
+#define conv2d_12_weights_scale 0.0017239248845726252 
+#define conv2d_12_weights_zero_point -112
+
+#define conv2d_12_bias_scale 0.0005655642016790807 
+#define conv2d_12_bias_zero_point 0
+
 #define conv2d_12_output_size 14
-int conv2d_12_output[14][14][672];
+#define conv2d_12_output_scale 0.07632230222225189 
+#define conv2d_12_output_zero_point 0
+
+uint8_t conv2d_12_output[14][14][672];
 
 //dw12 14x14x672
 #define dw12_weights_size 3
@@ -415,8 +686,17 @@ int conv2d_12_output[14][14][672];
 #define dw12_weights_num 1
 #define dw12_weights_stride 1
 #define dw12_weights_padding 1
+#define dw12_weights_scale 0.07369618862867355 
+#define dw12_weights_zero_point -143
+
+#define dw12_bias_scale 0.00562466261908412 
+#define dw12_bias_zero_point 0
+
 #define dw12_output_size 14
-int dw12_output[14][14][672];
+#define dw12_output_scale 0.16535194218158722 
+#define dw12_output_zero_point 0
+
+uint8_t dw12_output[14][14][672];
 
 //pw12 14x14x80
 #define pw12_weights_size 1
@@ -424,13 +704,24 @@ int dw12_output[14][14][672];
 #define pw12_weights_num 112
 #define pw12_weights_stride 1
 #define pw12_weights_padding 0
+#define pw12_weights_scale 0.007839914411306381 
+#define pw12_weights_zero_point -129
+
+#define pw12_bias_scale 0.0012963450280949473 
+#define pw12_bias_zero_point 0
+
 #define pw12_output_size 14
-int pw12_output[14][14][112];
+#define pw12_output_scale 0.34701263904571533 
+#define pw12_output_zero_point -132
+
+uint8_t pw12_output[14][14][112];
 
 //Add_8 14x14x112
 #define add_8_output_size 14
 #define add_8_output_channels 112
-int add_8_output[14][14][112];
+#define add_8_output_scale 0.38235411047935486 
+#define add_8_output_zero_point -133
+uint8_t add_8_output[14][14][112];
 
 //conv2d_13 14x14x672
 #define conv2d_13_weights_size 1
@@ -438,8 +729,16 @@ int add_8_output[14][14][112];
 #define conv2d_13_weights_num 672
 #define conv2d_13_weights_stride 1
 #define conv2d_13_weights_padding 0
+#define conv2d_13_weights_scale 0.002139686606824398
+#define conv2d_13_weights_zero_point -105
+
+#define conv2d_13_bias_scale 0.0008181180455721915 
+#define conv2d_13_bias_zero_point 0
+
 #define conv2d_13_output_size 14
-int conv2d_13_output[14][14][672];
+#define conv2d_13_output_scale 0.08312690258026123 
+#define conv2d_13_output_zero_point 0
+uint8_t conv2d_13_output[14][14][672];
 
 //dw13 7x7x672
 #define dw13_weights_size 3
@@ -447,8 +746,17 @@ int conv2d_13_output[14][14][672];
 #define dw13_weights_num 1
 #define dw13_weights_stride 2
 #define dw13_weights_padding (1.0/2.0)
+#define dw13_weights_scale 0.04658949375152588 
+#define dw13_weights_zero_point -94
+
+#define dw13_bias_scale 0.0038728404324501753 
+#define dw13_bias_zero_point 0
+
 #define dw13_output_size 7
-int dw13_output[7][7][672];
+#define dw13_output_scale 0.20200207829475403  
+#define dw13_output_zero_point 0
+
+uint8_t dw13_output[7][7][672];
 
 //pw13 7x7x160
 #define pw13_weights_size 1
@@ -456,8 +764,17 @@ int dw13_output[7][7][672];
 #define pw13_weights_num 160
 #define pw13_weights_stride 1
 #define pw13_weights_padding 0
+#define pw13_weights_scale 0.004779632668942213 
+#define pw13_weights_zero_point -121
+
+#define pw13_bias_scale 0.0009654957102611661 
+#define pw13_bias_zero_point 0
+
 #define pw13_output_size 7
-int pw13_output[7][7][160];
+#define pw13_output_scale 0.3152458965778351 
+#define pw13_output_zero_point -122
+
+uint8_t pw13_output[7][7][160];
 
 //conv2d_14 7x7x960
 #define conv2d_14_weights_size 1
@@ -465,8 +782,16 @@ int pw13_output[7][7][160];
 #define conv2d_14_weights_num 960
 #define conv2d_14_weights_stride 1
 #define conv2d_14_weights_padding 0
+#define conv2d_14_weights_scale 0.0020118532702326775  
+#define conv2d_14_weights_zero_point -149
+
+#define conv2d_14_bias_scale 0.0006342285196296871 
+#define conv2d_14_bias_zero_point 0
+
 #define conv2d_14_output_size 7
-int conv2d_14_output[7][7][960];
+#define conv2d_14_output_scale 0.11022955179214478 
+#define conv2d_14_output_zero_point 0
+uint8_t conv2d_14_output[7][7][960];
 
 //dw14 7x7x960
 #define dw14_weights_size 3
@@ -474,8 +799,17 @@ int conv2d_14_output[7][7][960];
 #define dw14_weights_num 1
 #define dw14_weights_stride 1
 #define dw14_weights_padding 1
+#define dw14_weights_scale 0.11063125729560852 
+#define dw14_weights_zero_point -130
+
+#define dw14_bias_scale 0.012194833718240261 
+#define dw14_bias_zero_point 0
+
 #define dw14_output_size 7
-int dw14_output[7][7][960];
+#define dw14_output_scale 0.1480780392885208 
+#define dw14_output_zero_point 0
+
+uint8_t dw14_output[7][7][960];
 
 //pw14 7x7x160
 #define pw14_weights_size 1
@@ -483,13 +817,25 @@ int dw14_output[7][7][960];
 #define pw14_weights_num 160
 #define pw14_weights_stride 1
 #define pw14_weights_padding 0
+#define pw14_weights_scale 0.007899901829659939 
+#define pw14_weights_zero_point -146
+
+#define pw14_bias_scale 0.0011698019225150347  
+#define pw14_bias_zero_point 0
+
 #define pw14_output_size 7
-int pw14_output[7][7][160];
+#define pw14_output_scale 0.258070707321167  
+#define pw14_output_zero_point -123
+
+uint8_t pw14_output[7][7][160];
 
 //Add_9 7x7x160
 #define add_9_output_size 7
 #define add_9_output_channels 160
-int add_9_output[7][7][160];
+#define add_9_output_scale 0.3708127737045288 
+#define add_9_output_zero_point -125
+
+uint8_t add_9_output[7][7][160];
 
 //conv2d_15 7x7x960
 #define conv2d_15_weights_size 1
@@ -497,8 +843,17 @@ int add_9_output[7][7][160];
 #define conv2d_15_weights_num 960
 #define conv2d_15_weights_stride 1
 #define conv2d_15_weights_padding 0
+#define conv2d_15_scale 0.0013757619308307767 
+#define conv2d_15_zero_point -108
+
+#define conv2d_15_bias_scale 0.0005101501010358334
+#define conv2d_15_bias_zero_point 0
+
 #define conv2d_15_output_size 7
-int conv2d_15_output[7][7][960];
+#define conv2d_15_output_scale 0.079544298350811 
+#define conv2d_15_output_zero_point 0
+
+uint8_t conv2d_15_output[7][7][960];
 
 //dw15 7x7x960
 #define dw15_weights_size 3
@@ -506,8 +861,16 @@ int conv2d_15_output[7][7][960];
 #define dw15_weights_num 1
 #define dw15_weights_stride 1
 #define dw15_weights_padding 1
+#define dw15_scale 0.0013757619308307767 
+#define dw15_zero_point -108
+
+#define dw15_bias_scale 0.0005101501010358334
+#define dw15_bias_zero_point 0
+
 #define dw15_output_size 7
-int dw15_output[7][7][960];
+#define dw15_output_scale 0.079544298350811 
+#define dw15_output_zero_point 0
+uint8_t dw15_output[7][7][960];
 
 //pw15 7x7x160
 #define pw15_weights_size 1
@@ -515,29 +878,50 @@ int dw15_output[7][7][960];
 #define pw15_weights_num 160
 #define pw15_weights_stride 1
 #define pw15_weights_padding 0
+#define pw15_scale 0.019383670762181282 
+#define pw15_zero_point -167
+
+#define pw15_bias_scale 0.003119788132607937 
+#define pw15_bias_zero_point 0
+
 #define pw15_output_size 7
-int pw15_output[7][7][160];
+#define pw15_output_scale 0.38830405473709106 
+#define pw15_output_zero_point -121
+
+uint8_t pw15_output[7][7][160];
 
 //Add_10 7x7x160
 #define add_10_output_size 7
 #define add_10_output_channels 160
-int add_10_output[7][7][160];
+#define add_10_output_scale 0.38830405473709106 
+#define add_10_output_zero_point -121
 
-//conv2d_16 7x7x960bias
+uint8_t add_10_output[7][7][160];
+
+//conv2d_16 7x7x960
 #define conv2d_16_weights_size 1
 #define conv2d_16_weights_channels 160
 #define conv2d_16_weights_num 960
 #define conv2d_16_weights_stride 1
 #define conv2d_16_weights_padding 0
+#define conv2d_16_scale 0.003714228980243206  
+#define conv2d_16_zero_point -134
+
+#define conv2d_16_bias_scale 0.0018642294453456998 
+#define conv2d_16_bias_zero_point 0
+
 #define conv2d_16_output_size 7
-int conv2d_16_output[7][7][960];
+#define conv2d_16_output_scale 0.4507608115673065 
+#define conv2d_16_output_zero_point 0
+
+uint8_t conv2d_16_output[7][7][960];
 
 //AveragePool2d_1 1x1x960
 #define averagepool2d_1_weights_size 7
 #define averagepool2d_1_weights_stride 1
 #define averagepool2d_1_weights_padding 0
 #define averagepool2d_1_output_size 1
-int averagepool2d_1_output[1][1][960];
+uint8_t averagepool2d_1_output[1][1][960];
 
 //conv2d_17 1x1x1280
 #define conv2d_17_weights_size 1
@@ -545,15 +929,24 @@ int averagepool2d_1_output[1][1][960];
 #define conv2d_17_weights_num 1280
 #define conv2d_17_weights_stride 1
 #define conv2d_17_weights_padding 0
+#define conv2d_17_scale 0.008932989090681076  
+#define conv2d_17_zero_point -93
+
+#define conv2d_17_bias_scale 0.004026641603559256 
+#define conv2d_17_bias_zero_point 0
+
 #define conv2d_17_output_size 1
-int conv2d_17_output[1][1][1280];
+#define conv2d_17_output_scale 0.019861046224832535  
+#define conv2d_17_output_zero_point 0
+
+uint8_t conv2d_17_output[1][1][1280];
 
 //AveragePool2d_2 1x1x1280
 #define averagepool2d_2_weights_size 1
 #define averagepool2d_2_weights_stride 1
 #define averagepool2d_2_weights_padding 0
 #define averagepool2d_2_output_size 1
-int averagepool2d_2_output[1][1][1280];
+uint8_t averagepool2d_2_output[1][1][1280];
 
 //conv2d_18 1x1x1001
 #define conv2d_18_weights_size 1
@@ -561,14 +954,23 @@ int averagepool2d_2_output[1][1][1280];
 #define conv2d_18_weights_num 1001
 #define conv2d_18_weights_stride 1
 #define conv2d_18_weights_padding 0
+#define conv2d_18_scale 0.004494924563914537 
+#define conv2d_18_zero_point -153
+
+#define conv2d_18_bias_scale 0.00008927390445023775 
+#define conv2d_18_bias_zero_point 0
+
 #define conv2d_18_output_size 1
-int conv2d_18_output[1][1][1001];
+#define conv2d_18_output_scale 0.08109557628631592 
+#define conv2d_18_output_zero_point -72
+
+uint8_t conv2d_18_output[1][1][1001];
 
 //Reshape 1001
-int reshape_output[1001];
+uint8_t reshape_output[1001];
 
 //Softmax 1001
-int softmax_output[1001];
+uint8_t softmax_output[1001];
 
 void frexp_function(float multiplier, float *fraction, int *exponent) {
     *fraction = frexp(multiplier, &(*exponent));
@@ -909,7 +1311,7 @@ void conv2d_2(){
     // Calculate the conv2d_2_multiplier
     const float conv2d_2_multiplier = add_1_output_scale * conv2d_2_weights_scale / conv2d_2_output_scale;
 
-    // Normalized fraction and exponent the pw1_multiplier
+    // Normalized fraction and exponent the conv2d_2_multiplier
     float conv2d_2_fraction;
     int conv2d_2_exponent;
     frexp_function(conv2d_2_multiplier, &conv2d_2_fraction, &conv2d_2_exponent);
@@ -962,7 +1364,7 @@ void dw2(){
     // Calculate the normalized dw2_multiplier
     const float dw2_multiplier = conv2d_2_output_scale * dw2_weights_scale / dw2_output_scale;
 
-    // Normalized fraction and exponent the pw1_multiplier
+    // Normalized fraction and exponent the dw2_multiplier
     float dw2_fraction;
     int dw2_exponent;
     frexp_function(dw2_multiplier, &dw2_fraction, &dw2_exponent);
@@ -1032,54 +1434,136 @@ void dw2(){
     printf("Second element of dw2_output_32: %d\n", dw2_output_32[1][0][0]);
     printf("First element of dw2_output: %d\n", dw2_output[0][0][0]);
     printf("Second element of dw2_output: %d\n", dw2_output[1][0][0]);
-    printf("Size of dw2_output: %d x %d x %d \n", LEN(dw2_output), LEN(dw2_output[0]), LEN(dw2_output[0][0]));
+    printf("Size of dw2_output: %d x %d x %d \n\n", LEN(dw2_output), LEN(dw2_output[0]), LEN(dw2_output[0][0]));
 }
 
 void pw2(){
+
+    // Calculate the normalized pw2_multiplier
+    const float pw2_multiplier = dw2_output_scale * pw2_weights_scale / pw2_output_scale;
+
+    // Normalized fraction and exponent the pw2_multiplier
+    float pw2_fraction;
+    int pw2_exponent;
+    frexp_function(pw2_multiplier, &pw2_fraction, &pw2_exponent);
+    int pw2_fraction_int32 = pw2_fraction * (1ll << 31);
+    printf("pw2_multiplier = %f = %d * 2^%d\n", pw2_multiplier, pw2_fraction_int32, pw2_exponent);
+
+    int32_t pw2_output_32[pw2_output_size][pw2_output_size][pw2_weights_num];
+
+    printf("First element of pw2_weights: %d\n", pw2_weights[0][0][0][0]);
+    printf("Second element of pw2_weights: %d\n", pw2_weights[1][0][0][0]);
 
     // Perform pw2
     for(int k = 0; k < pw2_weights_num; k++){
         for (int i = 0; i < pw2_output_size; i++) {
             for (int j = 0; j < pw2_output_size; j++) {
-                pw2_output[i][j][k] = 0;
+                pw2_output_32[i][j][k] = 0;
                 for (int l = 0; l < pw2_weights_channels; l++) {
                     for (int m = 0; m < pw2_weights_size; m++) {
                         for (int n = 0; n < pw2_weights_size; n++) {
-                            pw2_output[i][j][k] += dw2_output[i*pw2_weights_stride + m][j*pw2_weights_stride + n][l] * pw2_weights[m][n][l][k];
+                            pw2_output_32[i][j][k] += dw2_output[i*pw2_weights_stride + m][j*pw2_weights_stride + n][l] * pw2_weights[m][n][l][k];
                         }
                     }
                 }
-                pw2_output[i][j][k] += pw2_biases[k];
+                pw2_output_32[i][j][k] += pw2_biases[k];
+
+                pw2_output_32[i][j][k] = fixed_point_multipilier(pw2_output_32[i][j][k], pw2_fraction_int32, pw2_exponent);
+
+                // Cast to uint8_t
+                pw2_output[i][j][k] = (uint8_t)pw2_output_32[i][j][k];
+
+                // Add zero point 
+                pw2_output[i][j][k] = pw2_output[i][j][k] - pw2_output_zero_point;
+
+                // Saturate
+                if (pw2_output[i][j][k] < 0) {
+                    pw2_output[i][j][k] = 0;
+                } else if (pw2_output[i][j][k] > 255) {
+                    pw2_output[i][j][k] = 255;
+                }
+
             }
         }
     }
+    printf("First element of pw2_output_32: %d\n", pw2_output_32[0][0][0]);
+    printf("Second element of pw2_output_32: %d\n", pw2_output_32[1][0][0]);
     printf("First element of pw2_output: %d\n", pw2_output[0][0][0]);
-    printf("Size of pw2_output: %d x %d x %d \n", LEN(pw2_output), LEN(pw2_output[0]), LEN(pw2_output[0][0]));
+    printf("Second element of pw2_output: %d\n", pw2_output[1][0][0]);
+    printf("Size of pw2_output: %d x %d x %d \n\n", LEN(pw2_output), LEN(pw2_output[0]), LEN(pw2_output[0][0]));
 }
 
 void conv2d_3(){
+
+    // Calculate the normalized conv2d_3_multiplier
+    const float conv2d_3_multiplier = pw2_output_scale * conv2d_3_weights_scale / conv2d_3_output_scale;
+
+    // Normalized fraction and exponent the conv2d_3_multiplier
+    float conv2d_3_fraction;
+    int conv2d_3_exponent;
+    frexp_function(conv2d_3_multiplier, &conv2d_3_fraction, &conv2d_3_exponent);
+    int conv2d_3_fraction_int32 = conv2d_3_fraction * (1ll << 31);
+    printf("pw2_multiplier = %f = %d * 2^%d\n", conv2d_3_multiplier, conv2d_3_fraction_int32, conv2d_3_exponent);
+
+    int32_t conv2d_3_output_32[conv2d_3_output_size][conv2d_3_output_size][conv2d_3_weights_num];
+
+    printf("First element of conv2d_3_weights: %d\n", conv2d_3_weights[0][0][0][0]);
+    printf("Second element of conv2d_3_weights: %d\n", conv2d_3_weights[1][0][0][0]);
 
     // Perform conv2d_3
     for(int k = 0; k < conv2d_3_weights_num; k++){
         for (int i = 0; i < conv2d_3_output_size; i++) {
             for (int j = 0; j < conv2d_3_output_size; j++) {
-                conv2d_3_output[i][j][k] = 0;
+                conv2d_3_output_32[i][j][k] = 0;
                 for (int l = 0; l < conv2d_3_weights_channels; l++) {
                     for (int m = 0; m < conv2d_3_weights_size; m++) {
                         for (int n = 0; n < conv2d_3_weights_size; n++) {
-                            conv2d_3_output[i][j][k] += pw2_output[i*conv2d_3_weights_stride + m][j*conv2d_3_weights_stride + n][l] * conv2d_3_weights[m][n][l][k];
+                            conv2d_3_output_32[i][j][k] += pw2_output[i*conv2d_3_weights_stride + m][j*conv2d_3_weights_stride + n][l] * conv2d_3_weights[m][n][l][k];
                         }
                     }
                 }
                 conv2d_3_output[i][j][k] += conv2d_3_biases[k];
+
+                conv2d_3_output_32[i][j][k] = fixed_point_multipilier(conv2d_3_output_32[i][j][k], conv2d_3_fraction_int32, conv2d_3_exponent);
+
+                // Cast to uint8_t
+                conv2d_3_output[i][j][k] = (uint8_t)conv2d_3_output_32[i][j][k];
+
+                // Add zero point 
+                conv2d_3_output[i][j][k] = conv2d_3_output[i][j][k] - conv2d_3_output_zero_point;
+
+                // Saturate
+                if (conv2d_3_output[i][j][k] < 0) {
+                    conv2d_3_output[i][j][k] = 0;
+                } else if (conv2d_3_output[i][j][k] > 255) {
+                    conv2d_3_output[i][j][k] = 255;
+                }
             }
         }
     }
+    printf("First element of conv2d_3_output_32: %d\n", conv2d_3_output_32[0][0][0]);
+    printf("Second element of conv2d_3_output_32: %d\n", conv2d_3_output_32[1][0][0]);
     printf("First element of conv2d_3_output: %d\n", conv2d_3_output[0][0][0]);
-    printf("Size of conv2d_3_output: %d x %d x %d \n", LEN(conv2d_3_output), LEN(conv2d_3_output[0]), LEN(conv2d_3_output[0][0]));
+    printf("Second element of conv2d_3_output: %d\n", conv2d_3_output[1][0][0]);
+    printf("Size of conv2d_3_output: %d x %d x %d \n\n", LEN(conv2d_3_output), LEN(conv2d_3_output[0]), LEN(conv2d_3_output[0][0]));
 }
 
 void dw3(){
+
+    // Calculate the normalized dw3_multiplier
+    const float dw3_multiplier = conv2d_3_output_scale * dw3_weights_scale / dw3_output_scale;
+
+    // Normalized fraction and exponent the dw3_multiplier
+    float dw3_fraction;
+    int dw3_exponent;
+    frexp_function(dw3_multiplier, &dw3_fraction, &dw3_exponent);
+    int dw3_fraction_int32 = dw3_fraction * (1ll << 31);
+    printf("pw2_multiplier = %f = %d * 2^%d\n", dw3_multiplier, dw3_fraction_int32, dw3_exponent);
+
+    int32_t dw3_output_32[dw3_output_size][dw3_output_size][dw3_weights_channels];
+
+    printf("First element of dw3_weights: %d\n", dw3_weights[0][0][0][0]);
+    printf("Second element of dw3_weights: %d\n", dw3_weights[1][0][0][0]);
 
     // Initialize padded conv2d_3_output with zero value
     static const int padded_conv2d_3_output_size = 58;
@@ -1107,18 +1591,37 @@ void dw3(){
     for (int k = 0; k < dw3_weights_channels; k++) {
         for (int i = 0; i < dw3_output_size; i++) {
             for (int j = 0; j < dw3_output_size; j++) {
-                dw3_output[i][j][k] = 0;
+                dw3_output_32[i][j][k] = 0;
                 for (int l = 0; l < dw3_weights_size; l++) {
                     for (int m = 0; m < dw3_weights_size; m++) {
-                        dw3_output[i][j][k] += padded_conv2d_3_output[i*dw3_weights_stride + l][j*dw3_weights_stride + m][k] * dw3_weights[l][m][k][1];
+                        dw3_output_32[i][j][k] += padded_conv2d_3_output[i*dw3_weights_stride + l][j*dw3_weights_stride + m][k] * dw3_weights[l][m][k][1];
                     }
                 }
-                dw3_output[i][j][k] += dw3_biases[k];
+                dw3_output_32[i][j][k] += dw3_biases[k];
+
+                dw3_output_32[i][j][k] = fixed_point_multipilier(dw3_output_32[i][j][k], dw3_fraction_int32, dw3_exponent);
+
+                // Cast to uint8_t
+                dw3_output[i][j][k] = (uint8_t)dw3_output_32[i][j][k];
+
+                // Add zero point 
+                dw3_output[i][j][k] = dw3_output[i][j][k] - dw3_output_zero_point;
+
+                // Saturate
+                if (dw3_output[i][j][k] < 0) {
+                    dw3_output[i][j][k] = 0;
+                } else if (dw3_output[i][j][k] > 255) {
+                    dw3_output[i][j][k] = 255;
+                }
+
             }
         }
     }
+    printf("First element of dw3_output_32: %d\n", dw3_output_32[0][0][0]);
+    printf("Second element of dw3_output_32: %d\n", dw3_output_32[1][0][0]);
     printf("First element of dw3_output: %d\n", dw3_output[0][0][0]);
-    printf("Size of dw3_output: %d x %d x %d \n", LEN(dw3_output), LEN(dw3_output[0]), LEN(dw3_output[0][0]));
+    printf("Second element of dw3_output: %d\n", dw3_output[1][0][0]);
+    printf("Size of dw3_output: %d x %d x %d \n\n", LEN(dw3_output), LEN(dw3_output[0]), LEN(dw3_output[0][0]));
 }
 
 void pw3(){
@@ -2449,9 +2952,9 @@ int main (){
     add_1();
     conv2d_2();
     dw2();
-    // pw2();
-    // conv2d_3();
-    // dw3();
+    pw2();
+    conv2d_3();
+    dw3();
     // pw3();
     // add_2();
     // conv2d_4();
