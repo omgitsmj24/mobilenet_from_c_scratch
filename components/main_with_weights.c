@@ -1183,7 +1183,7 @@ void pw1(){
     int32_t pw1_output_32[pw1_output_size][pw1_output_size][pw1_weights_num];
 
     printf("First element of pw1_weights: %d\n", pw1_weights[0][0][0][0]);
-    printf("Second element of pw1_weights: %d\n", pw1_weights[1][0][0][0]);
+    printf("Second element of pw1_weights: %d\n", pw1_weights[0][0][1][0]);
 
     // Perform pw1
     for(int k = 0; k < pw1_weights_num; k++){
@@ -1508,7 +1508,7 @@ void conv2d_3(){
     int32_t conv2d_3_output_32[conv2d_3_output_size][conv2d_3_output_size][conv2d_3_weights_num];
 
     printf("First element of conv2d_3_weights: %d\n", conv2d_3_weights[0][0][0][0]);
-    printf("Second element of conv2d_3_weights: %d\n", conv2d_3_weights[1][0][0][0]);
+    printf("Second element of conv2d_3_weights: %d\n", conv2d_3_weights[0][0][1][0]);
 
     // Perform conv2d_3
     for(int k = 0; k < conv2d_3_weights_num; k++){
@@ -1613,7 +1613,6 @@ void dw3(){
                 } else if (dw3_output[i][j][k] > 255) {
                     dw3_output[i][j][k] = 255;
                 }
-
             }
         }
     }
@@ -1626,24 +1625,57 @@ void dw3(){
 
 void pw3(){
 
+    // Calculate the normalized pw3_multiplier
+    const float pw3_multiplier = dw3_output_scale * pw3_weights_scale / pw3_output_scale;
+
+    // Normalized fraction and exponent the pw3_multiplier
+    float pw3_fraction;
+    int pw3_exponent;
+    frexp_function(pw3_multiplier, &pw3_fraction, &pw3_exponent);
+    int pw3_fraction_int32 = pw3_fraction * (1ll << 31);
+    printf("pw2_multiplier = %f = %d * 2^%d\n", pw3_multiplier, pw3_fraction_int32, pw3_exponent);
+
+    int32_t pw3_output_32[pw3_output_size][pw3_output_size][pw3_weights_num];
+
+    printf("First element of dw3_weights: %d\n", pw3_weights[0][0][0][0]);
+    printf("Second element of dw3_weights: %d\n", pw3_weights[0][0][0][1]);
+
     //Perform pw3
     for(int k = 0; k < pw3_weights_num; k++){
         for (int i = 0; i < pw3_output_size; i++) {
             for (int j = 0; j < pw3_output_size; j++) {
-                pw3_output[i][j][k] = 0;
+                pw3_output_32[i][j][k] = 0;
                 for (int l = 0; l < pw3_weights_channels; l++) {
                     for (int m = 0; m < pw3_weights_size; m++) {
                         for (int n = 0; n < pw3_weights_size; n++) {
-                            pw3_output[i][j][k] += dw3_output[i*pw3_weights_stride + m][j*pw3_weights_stride + n][l] * pw3_weights[m][n][l][k];
+                            pw3_output_32[i][j][k] += dw3_output[i*pw3_weights_stride + m][j*pw3_weights_stride + n][l] * pw3_weights[m][n][l][k];
                         }
                     }
                 }
-                pw3_output[i][j][k] += pw3_biases[k];
+                pw3_output_32[i][j][k] += pw3_biases[k];
+
+                pw3_output_32[i][j][k] = fixed_point_multipilier(pw3_output_32[i][j][k], pw3_fraction_int32, pw3_exponent);
+
+                // Cast to uint8_t
+                pw3_output[i][j][k] = (uint8_t)pw3_output_32[i][j][k];
+
+                // Add zero point 
+                pw3_output[i][j][k] = pw3_output[i][j][k] - pw3_output_zero_point;
+
+                // Saturate
+                if (pw3_output[i][j][k] < 0) {
+                    pw3_output[i][j][k] = 0;
+                } else if (pw3_output[i][j][k] > 255) {
+                    pw3_output[i][j][k] = 255;
+                }
             }
         }
     }
-    printf("First element of dw3_output: %d\n", dw3_output[0][0][0]);
-    printf("Size of pw3_output: %d x %d x %d \n", LEN(pw3_output), LEN(pw3_output[0]), LEN(pw3_output[0][0]));
+    printf("First element of pw3_output_32: %d\n", pw3_output_32[0][0][0]);
+    printf("Second element of pw3_output_32: %d\n", pw3_output_32[1][0][0]);
+    printf("First element of dw3_output: %d\n", pw3_output[0][0][0]);
+    printf("Second element of dw3_output: %d\n", pw3_output[1][0][0]);
+    printf("Size of pw3_output: %d x %d x %d \n\n", LEN(pw3_output), LEN(pw3_output[0]), LEN(pw3_output[0][0]));
 }
 
 void add_2(){
@@ -2955,7 +2987,7 @@ int main (){
     pw2();
     conv2d_3();
     dw3();
-    // pw3();
+    pw3();
     // add_2();
     // conv2d_4();
     // dw4();
