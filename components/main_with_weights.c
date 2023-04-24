@@ -2411,15 +2411,90 @@ void pw6(){
 }
 
 void add_4(){
-    for(int i = 0; i < conv2d_6_output_size; i++){
-        for(int j = 0; j < conv2d_6_output_size; j++){
-            for(int k = 0; k < pw6_weights_num; k++){
-                add_4_output[i][j][k] = pw6_output[i][j][k] + add_3_output[i][j][k];
+
+    // Calculate the input and output new scale
+    const float add_4_input_1_scale = 0.5;
+    const int add_4_input_1_zero_point = pw6_output_scale;
+    const float add_4_input_2_scale = add_3_output_scale / (2 * pw6_output_scale);
+    const int add_4_input_2_zero_point = add_3_output_zero_point;
+    const float add_4_output_scale_new = 2 * pw6_output_scale / add_4_output_scale;
+
+    // Normalized fraction and exponent the add_4_input_1_scale
+    float add_4_input_1_scale_fraction;
+    int add_4_input_1_scale_exponent;
+    frexp_function(add_4_input_1_scale, &add_4_input_1_scale_fraction, &add_4_input_1_scale_exponent);
+    int add_4_input_1_scale_fraction_int32 = add_4_input_1_scale_fraction * (1ll << 31);
+    printf("add_4_input_1_scale = %f = %d * 2^%d\n", add_4_input_1_scale, add_4_input_1_scale_fraction_int32, add_4_input_1_scale_exponent);
+
+    // Normalized fraction and exponent the add_4_input_2_scale
+    float add_4_input_2_scale_fraction;
+    int add_4_input_2_scale_exponent;
+    frexp_function(add_4_input_2_scale, &add_4_input_2_scale_fraction, &add_4_input_2_scale_exponent);
+    int add_4_input_2_scale_fraction_int32 = add_4_input_2_scale_fraction * (1ll << 31);
+    printf("add_4_input_2_scale = %f = %d * 2^%d\n", add_4_input_2_scale, add_4_input_2_scale_fraction_int32, add_4_input_2_scale_exponent);
+
+    // Normalized fraction and exponent the add_4_output_scale_new
+    float add_4_output_scale_new_fraction;
+    int add_4_output_scale_new_exponent;    
+    frexp_function(add_4_output_scale_new / (1 << 20), &add_4_output_scale_new_fraction, &add_4_output_scale_new_exponent);
+    int add_4_output_scale_new_fraction_int32 = add_4_output_scale_new_fraction * (1ll << 31);
+    printf("add_4_output_scale_new = %f = %d * 2^%d\n", add_4_output_scale_new, add_4_output_scale_new_fraction_int32, add_4_output_scale_new_exponent);
+    
+    // Define size of add_4_input_1, add_4_input_2, add_4_output_32
+    int32_t add_4_input_1[add_4_output_size][add_4_output_size][add_4_output_channels];
+    int32_t add_4_input_2[add_4_output_size][add_4_output_size][add_4_output_channels];
+    int32_t add_4_output_32[add_4_output_size][add_4_output_size][add_4_output_channels];
+
+    // Copy value of previous layers into add_4_input_1 and add_4_input_2
+    for(int i = 0; i < add_4_output_size; i++){
+        for(int j = 0; j < add_4_output_size; j++){
+            for(int k = 0; k < add_4_output_channels; k++){
+                add_4_input_1[i][j][k] = pw6_output[i][j][k];
+                add_4_input_2[i][j][k] = add_3_output[i][j][k];
             }
         }
     }
+
+    printf("add_4_input_1[%d][%d][%d] = %d\n", 0, 0, 0, add_4_input_1[0][0][0]);
+    printf("add_4_input_1[%d][%d][%d] = %d\n", 1, 0, 0, add_4_input_1[1][0][0]);
+
+    printf("add_4_input_2[%d][%d][%d] = %d\n", 0, 0, 0, add_4_input_2[0][0][0]);
+    printf("add_4_input_2[%d][%d][%d] = %d\n", 1, 0, 0, add_4_input_2[1][0][0]);
+    
+    // Perform add_4
+    for(int i = 0; i < add_4_output_size; i++){
+        for(int j = 0; j < add_4_output_size; j++){
+            for(int k = 0; k < add_4_output_channels; k++){
+
+                // Add zero point
+                add_4_input_1[i][j][k] += add_4_input_1_zero_point;
+                add_4_input_2[i][j][k] += add_4_input_2_zero_point;
+
+                // Left shift the input
+                add_4_input_1[i][j][k] = add_4_input_1[i][j][k] * (1 << 20);
+                add_4_input_2[i][j][k] = add_4_input_2[i][j][k] * (1 << 20);
+
+                // Fixed point multiplier
+                add_4_input_1[i][j][k] = fixed_point_multipilier(add_4_input_1[i][j][k], add_4_input_1_scale_fraction_int32, add_4_input_1_scale_exponent);
+                add_4_input_2[i][j][k] = fixed_point_multipilier(add_4_input_2[i][j][k], add_4_input_2_scale_fraction_int32, add_4_input_2_scale_exponent);
+                add_4_output_32[i][j][k] = add_4_input_1[i][j][k] + add_4_input_2[i][j][k];
+
+                // Fixed point multiplier
+                add_4_output_32[i][j][k] = fixed_point_multipilier(add_4_output_32[i][j][k], add_4_output_scale_new_fraction_int32, add_4_output_scale_new_exponent);
+
+                // Add zero point to add_4_output
+                add_4_output_32[i][j][k] -= add_4_output_zero_point;
+
+                // Saturate the output
+                add_4_output[i][j][k] = saturate(add_4_output_32[i][j][k]);
+            }
+        }
+    }
+    printf("First element of add_4_output_32: %d\n", add_4_output_32[0][0][0]);
+    printf("Second element of add_4_output_32: %d\n", add_4_output_32[1][0][0]);
     printf("First element of add_4_output: %d\n", add_4_output[0][0][0]);
-    printf("Size of add_4_output: %d x %d x %d \n", LEN(add_4_output), LEN(add_4_output[0]), LEN(add_4_output[0][0]));
+    printf("Second element of add_4_output: %d\n", add_4_output[1][0][0]);
+    printf("Size of add_4_output: %d x %d x %d \n\n", LEN(add_4_output), LEN(add_4_output[0]), LEN(add_4_output[0][0]));
 }
 
 void conv2d_7(){
@@ -3445,7 +3520,7 @@ int main (){
     conv2d_6();
     dw6();
     pw6();
-    // add_4();
+    add_4();
     // conv2d_7();
     // dw7();
     // pw7();
