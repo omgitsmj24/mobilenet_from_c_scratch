@@ -1128,35 +1128,42 @@ void dw1(){
 
     int32_t dw1_output_32[dw1_output_size][dw1_output_size][dw1_weights_channels];
 
+    for (int k = 0; k < dw1_output_size; k++){
+        for (int i = 0; i < dw1_output_size; i++) {
+            for (int j = 0; j < dw1_weights_channels; j++) {
+                dw1_output_32[i][j][k] = 0;
+            }
+        }
+    }
+
     printf("First element of dw1_weights: %d\n", dw1_weights[0][0][0][0]);
     printf("Second element of dw1_weights: %d\n", dw1_weights[1][0][0][0]);
 
     // Perform dw1
-    for (int k = 0; k < dw1_weights_channels; k++){
+    for (int k = 0; k < dw1_weights_num; k++){
         for (int i = 0; i < dw1_output_size; i++) {
             for (int j = 0; j < dw1_output_size; j++) {
-                dw1_output_32[i][j][k] = 0;
                 for (int l = 0; l < dw1_weights_channels; l++) {
                     for (int m = 0; m < dw1_weights_size; m++) {
                         for (int n = 0; n < dw1_weights_size; n++) {
                             dw1_output_32[i][j][k] += conv2d_1_output_padded[i*dw1_weights_stride + m][j*dw1_weights_stride + n][l] * dw1_weights[m][n][l][k];
                         }
                     }
-                }
-                dw1_output_32[i][j][k] += dw1_biases[k];
-                dw1_output_32[i][j][k] = fixed_point_multipilier(dw1_output_32[i][j][k], dw1_fraction_int32, dw1_exponent);
+                    dw1_output_32[i][j][l] += dw1_biases[l];
+                    dw1_output_32[i][j][l] = fixed_point_multipilier(dw1_output_32[i][j][l], dw1_fraction_int32, dw1_exponent);
 
-                dw1_output[i][j][k] = (uint8_t)(dw1_output_32[i][j][k]);
+                    dw1_output[i][j][l] = (uint8_t)(dw1_output_32[i][j][l]);
 
-                //Add zero point to dw1_output
-                dw1_output[i][j][k] -= dw1_output_zero_point;
+                    //Add zero point to dw1_output
+                    dw1_output[i][j][l] -= dw1_output_zero_point;
 
-                //Saturate
-                if (dw1_output[i][j][k] > 255){
-                    dw1_output[i][j][k] = 255;
-                }
-                else if (dw1_output[i][j][k] < 0){
-                    dw1_output[i][j][k] = 0;
+                    //Saturate
+                    if (dw1_output[i][j][l] > 255){
+                        dw1_output[i][j][l] = 255;
+                    }
+                    else if (dw1_output[i][j][l] < 0){
+                        dw1_output[i][j][l] = 0;
+                    }
                 }
             }
         }
@@ -1594,7 +1601,7 @@ void dw3(){
                 dw3_output_32[i][j][k] = 0;
                 for (int l = 0; l < dw3_weights_size; l++) {
                     for (int m = 0; m < dw3_weights_size; m++) {
-                        dw3_output_32[i][j][k] += padded_conv2d_3_output[i*dw3_weights_stride + l][j*dw3_weights_stride + m][k] * dw3_weights[l][m][k][1];
+                        dw3_output_32[i][j][k] += padded_conv2d_3_output[i*dw3_weights_stride + l][j*dw3_weights_stride + m][k] * dw3_weights[l][m][k][0];
                     }
                 }
                 dw3_output_32[i][j][k] += dw3_biases[k];
@@ -1868,7 +1875,7 @@ void dw4(){
                 dw4_output_32[i][j][k] = 0;
                 for (int l = 0; l < dw4_weights_size; l++) {
                     for (int m = 0; m < dw4_weights_size; m++) {
-                        dw4_output_32[i][j][k] += conv2d_4_output_padded[i*dw4_weights_stride + l][j*dw4_weights_stride + m][k] * dw4_weights[l][m][k][1];
+                        dw4_output_32[i][j][k] += conv2d_4_output_padded[i*dw4_weights_stride + l][j*dw4_weights_stride + m][k] * dw4_weights[l][m][k][0];
                     }
                 }
                 dw4_output_32[i][j][k] += dw4_biases[k];
@@ -2021,6 +2028,15 @@ void dw5(){
 
     int32_t dw5_output_32[dw5_output_size][dw5_output_size][dw5_weights_channels];
 
+    // Initialize padded dw5_output_32 with 0
+    for(int i = 0; i < dw5_output_size; i++){
+        for(int j = 0; j < dw5_output_size; j++){
+            for(int k = 0; k < dw5_weights_channels; k++){
+                dw5_output_32[i][j][k] = 0;
+            }
+        }
+    }
+
     printf("First element of dw5_weights: %d\n", dw5_weights[0][0][0][0]);
     printf("Second element of dw5_weights: %d\n", dw5_weights[0][0][0][1]);
 
@@ -2047,14 +2063,13 @@ void dw5(){
     printf("Size of conv2d_5_padded_output: %d x %d x %d \n", LEN(conv2d_5_padded_output), LEN(conv2d_5_padded_output[0]), LEN(conv2d_5_padded_output[0][0]));
 
     //Perform dw5
-    for (int k = 0; k < dw5_weights_channels; k++){
+    for (int k = 0; k < dw5_weights_num; k++){
         for(int i = 0; i < dw5_output_size; i++){
             for(int j = 0; j < dw5_output_size; j++){
-                dw5_output_32[i][j][k] = 0;
                 for(int l = 0; l < dw5_weights_channels; l++){
                     for(int m = 0; m < dw5_weights_size; m++){
                         for(int n = 0; n < dw5_weights_size; n++){
-                            dw5_output_32[i][j][l] += conv2d_5_padded_output[i*dw5_weights_stride + m][j*dw5_weights_stride + n][l] * dw5_weights[m][n][l][k];
+                            dw5_output_32[i][j][l] += conv2d_5_padded_output[i*dw5_weights_stride + m][j*dw5_weights_stride + n][l] * dw5_weights[m][n][l][0];
                         }
                     }
                     dw5_output_32[i][j][l] += dw5_biases[l];
@@ -2327,7 +2342,7 @@ void dw6(){
                 dw6_output_32[i][j][k] = 0;
                 for(int l = 0; l < dw6_weights_size; l++){
                     for(int m = 0; m < dw6_weights_size; m++){
-                        dw6_output_32[i][j][k] += conv2d_6_output_padded[i*dw6_weights_stride + l][j*dw6_weights_stride + m][k] * dw6_weights[l][m][k][1];
+                        dw6_output_32[i][j][k] += conv2d_6_output_padded[i*dw6_weights_stride + l][j*dw6_weights_stride + m][k] * dw6_weights[l][m][k][0];
                     }
                 }
                 dw6_output_32[i][j][k] += dw6_biases[k];
@@ -2361,16 +2376,16 @@ void pw6(){
     // Calculate the normalized pw6_multiplier
     const float pw6_multiplier = dw6_output_scale * pw6_weights_scale / pw6_output_scale;
 
-    // Normalized fraction and exponent the pw5_multiplier
+    // Normalized fraction and exponent the pw6_multiplier
     float pw6_fraction;
     int pw6_exponent;
     frexp_function(pw6_multiplier, &pw6_fraction, &pw6_exponent);
     int pw6_fraction_int32 = pw6_fraction * (1ll << 31);
-    printf("pw5_multiplier = %f = %d * 2^%d\n", pw6_multiplier, pw6_fraction_int32, pw6_exponent);
+    printf("pw6_multiplier = %f = %d * 2^%d\n", pw6_multiplier, pw6_fraction_int32, pw6_exponent);
 
-    int32_t pw6_output_32[dw6_output_size][dw6_output_size][pw6_weights_num];
+    int32_t pw6_output_32[pw6_output_size][pw6_output_size][pw6_weights_num];
 
-    printf("Size of pw5_output_32: %d x %d x %d \n", LEN(pw6_output_32), LEN(pw6_output_32[0]), LEN(pw6_output_32[0][0]));
+    printf("Size of pw6_output_32: %d x %d x %d \n", LEN(pw6_output_32), LEN(pw6_output_32[0]), LEN(pw6_output_32[0][0]));
 
     //Perform pw6
     for(int k = 0; k < pw6_weights_num; k++){
@@ -2411,40 +2426,163 @@ void pw6(){
 }
 
 void add_4(){
-    for(int i = 0; i < conv2d_6_output_size; i++){
-        for(int j = 0; j < conv2d_6_output_size; j++){
-            for(int k = 0; k < pw6_weights_num; k++){
-                add_4_output[i][j][k] = pw6_output[i][j][k] + add_3_output[i][j][k];
+
+    // Calculate the input and output new scale
+    const float add_4_input_1_scale = 0.5;
+    const int add_4_input_1_zero_point = pw6_output_scale;
+    const float add_4_input_2_scale = add_3_output_scale / (2 * pw6_output_scale);
+    const int add_4_input_2_zero_point = add_3_output_zero_point;
+    const float add_4_output_scale_new = 2 * pw6_output_scale / add_4_output_scale;
+
+    // Normalized fraction and exponent the add_4_input_1_scale
+    float add_4_input_1_scale_fraction;
+    int add_4_input_1_scale_exponent;
+    frexp_function(add_4_input_1_scale, &add_4_input_1_scale_fraction, &add_4_input_1_scale_exponent);
+    int add_4_input_1_scale_fraction_int32 = add_4_input_1_scale_fraction * (1ll << 31);
+    printf("add_4_input_1_scale = %f = %d * 2^%d\n", add_4_input_1_scale, add_4_input_1_scale_fraction_int32, add_4_input_1_scale_exponent);
+
+    // Normalized fraction and exponent the add_4_input_2_scale
+    float add_4_input_2_scale_fraction;
+    int add_4_input_2_scale_exponent;
+    frexp_function(add_4_input_2_scale, &add_4_input_2_scale_fraction, &add_4_input_2_scale_exponent);
+    int add_4_input_2_scale_fraction_int32 = add_4_input_2_scale_fraction * (1ll << 31);
+    printf("add_4_input_2_scale = %f = %d * 2^%d\n", add_4_input_2_scale, add_4_input_2_scale_fraction_int32, add_4_input_2_scale_exponent);
+
+    // Normalized fraction and exponent the add_4_output_scale_new
+    float add_4_output_scale_new_fraction;
+    int add_4_output_scale_new_exponent;    
+    frexp_function(add_4_output_scale_new / (1 << 20), &add_4_output_scale_new_fraction, &add_4_output_scale_new_exponent);
+    int add_4_output_scale_new_fraction_int32 = add_4_output_scale_new_fraction * (1ll << 31);
+    printf("add_4_output_scale_new = %f = %d * 2^%d\n", add_4_output_scale_new, add_4_output_scale_new_fraction_int32, add_4_output_scale_new_exponent);
+    
+    // Define size of add_4_input_1, add_4_input_2, add_4_output_32
+    int32_t add_4_input_1[add_4_output_size][add_4_output_size][add_4_output_channels];
+    int32_t add_4_input_2[add_4_output_size][add_4_output_size][add_4_output_channels];
+    int32_t add_4_output_32[add_4_output_size][add_4_output_size][add_4_output_channels];
+
+    // Copy value of previous layers into add_4_input_1 and add_4_input_2
+    for(int i = 0; i < add_4_output_size; i++){
+        for(int j = 0; j < add_4_output_size; j++){
+            for(int k = 0; k < add_4_output_channels; k++){
+                add_4_input_1[i][j][k] = pw6_output[i][j][k];
+                add_4_input_2[i][j][k] = add_3_output[i][j][k];
             }
         }
     }
+
+    printf("add_4_input_1[%d][%d][%d] = %d\n", 0, 0, 0, add_4_input_1[0][0][0]);
+    printf("add_4_input_1[%d][%d][%d] = %d\n", 1, 0, 0, add_4_input_1[1][0][0]);
+
+    printf("add_4_input_2[%d][%d][%d] = %d\n", 0, 0, 0, add_4_input_2[0][0][0]);
+    printf("add_4_input_2[%d][%d][%d] = %d\n", 1, 0, 0, add_4_input_2[1][0][0]);
+    
+    // Perform add_4
+    for(int i = 0; i < add_4_output_size; i++){
+        for(int j = 0; j < add_4_output_size; j++){
+            for(int k = 0; k < add_4_output_channels; k++){
+
+                // Add zero point
+                add_4_input_1[i][j][k] += add_4_input_1_zero_point;
+                add_4_input_2[i][j][k] += add_4_input_2_zero_point;
+
+                // Left shift the input
+                add_4_input_1[i][j][k] = add_4_input_1[i][j][k] * (1 << 20);
+                add_4_input_2[i][j][k] = add_4_input_2[i][j][k] * (1 << 20);
+
+                // Fixed point multiplier
+                add_4_input_1[i][j][k] = fixed_point_multipilier(add_4_input_1[i][j][k], add_4_input_1_scale_fraction_int32, add_4_input_1_scale_exponent);
+                add_4_input_2[i][j][k] = fixed_point_multipilier(add_4_input_2[i][j][k], add_4_input_2_scale_fraction_int32, add_4_input_2_scale_exponent);
+                add_4_output_32[i][j][k] = add_4_input_1[i][j][k] + add_4_input_2[i][j][k];
+
+                // Fixed point multiplier
+                add_4_output_32[i][j][k] = fixed_point_multipilier(add_4_output_32[i][j][k], add_4_output_scale_new_fraction_int32, add_4_output_scale_new_exponent);
+
+                // Add zero point to add_4_output
+                add_4_output_32[i][j][k] -= add_4_output_zero_point;
+
+                // Saturate the output
+                add_4_output[i][j][k] = saturate(add_4_output_32[i][j][k]);
+            }
+        }
+    }
+    printf("First element of add_4_output_32: %d\n", add_4_output_32[0][0][0]);
+    printf("Second element of add_4_output_32: %d\n", add_4_output_32[1][0][0]);
     printf("First element of add_4_output: %d\n", add_4_output[0][0][0]);
-    printf("Size of add_4_output: %d x %d x %d \n", LEN(add_4_output), LEN(add_4_output[0]), LEN(add_4_output[0][0]));
+    printf("Second element of add_4_output: %d\n", add_4_output[1][0][0]);
+    printf("Size of add_4_output: %d x %d x %d \n\n", LEN(add_4_output), LEN(add_4_output[0]), LEN(add_4_output[0][0]));
 }
 
 void conv2d_7(){
+
+    // Calculate the normalized conv2d_7_multiplier
+    const float conv2d_7_multiplier = conv2d_7_weights_scale * add_4_output_scale / conv2d_7_output_scale;
+
+    // Normalized fraction and exponent the conv2d_7_multiplier
+    float conv2d_7_fraction;
+    int conv2d_7_exponent;
+    frexp_function(conv2d_7_multiplier, &conv2d_7_fraction, &conv2d_7_exponent);
+    int conv2d_7_fraction_int32 = conv2d_7_fraction * (1ll << 31);
+    printf("conv2d_7_multiplier = %f = %d * 2^%d\n", conv2d_7_multiplier, conv2d_7_fraction_int32, conv2d_7_exponent);
+
+    int32_t conv2d_7_output_32[conv2d_7_output_size][conv2d_7_output_size][conv2d_7_weights_num];
+
+    printf("First element of conv2d_7_weights: %d\n", conv2d_7_weights[0][0][0][0]);
+    printf("Second element of conv2d_7_weights: %d\n", conv2d_7_weights[0][0][0][1]);
 
     //Perform conv2d_7
     for(int k = 0; k < conv2d_7_weights_num; k++){
         for(int i = 0; i < add_4_output_size; i++){
             for(int j = 0; j < add_4_output_size; j++){
-                conv2d_7_output[i][j][k] = 0;
+                conv2d_7_output_32[i][j][k] = 0;
                 for(int l = 0; l < conv2d_7_weights_channels; l++){
                     for(int m = 0; m < conv2d_7_weights_size; m++){
                         for(int n = 0; n < conv2d_7_weights_size; n++){
-                            conv2d_7_output[i][j][k] += add_4_output[i*conv2d_7_weights_stride + m][j*conv2d_7_weights_stride + n][l] * conv2d_7_weights[m][n][l][k];
+                            conv2d_7_output_32[i][j][k] += add_4_output[i*conv2d_7_weights_stride + m][j*conv2d_7_weights_stride + n][l] * conv2d_7_weights[m][n][l][k];
                         }
                     }
                 }
-                conv2d_7_output[i][j][k] += conv2d_7_biases[k];
+                conv2d_7_output_32[i][j][k] += conv2d_7_biases[k];
+
+                conv2d_7_output_32[i][j][k] = fixed_point_multipilier(conv2d_7_output_32[i][j][k], conv2d_7_fraction_int32, conv2d_7_exponent);
+
+                // Cast to uint8_t
+                conv2d_7_output[i][j][k] = (uint8_t)conv2d_7_output_32[i][j][k];
+
+                // Add zero point
+                conv2d_7_output[i][j][k] = conv2d_7_output[i][j][k] - conv2d_7_output_zero_point;
+
+                // Saturate
+                if (conv2d_7_output[i][j][k] < 0) {
+                    conv2d_7_output[i][j][k] = 0;
+                } else if (conv2d_7_output[i][j][k] > 255) {
+                    conv2d_7_output[i][j][k] = 255;
+                }
             }
         }
     }
+    printf("First element of conv2d_7_output_32: %d\n", conv2d_7_output_32[0][0][0]);
+    printf("Second element of conv2d_7_output_32: %d\n", conv2d_7_output_32[1][0][0]);
     printf("First element of conv2d_7_output: %d\n", conv2d_7_output[0][0][0]);
-    printf("Size of conv2d_7_output: %d x %d x %d \n", LEN(conv2d_7_output), LEN(conv2d_7_output[0]), LEN(conv2d_7_output[0][0]));
+    printf("Second element of conv2d_7_output: %d\n", conv2d_7_output[1][0][0]);
+    printf("Size of conv2d_7_output: %d x %d x %d \n\n", LEN(conv2d_7_output), LEN(conv2d_7_output[0]), LEN(conv2d_7_output[0][0]));
 }
 
 void dw7(){
+
+    // Calculate the normalized dw7_multiplier
+    const float dw7_multiplier = conv2d_7_output_scale * dw7_weights_scale / dw7_output_scale;
+
+    // Normalized fraction and exponent the dw7_multiplier
+    float dw7_fraction;
+    int dw7_exponent;
+    frexp_function(dw7_multiplier, &dw7_fraction, &dw7_exponent);
+    int dw7_fraction_int32 = dw7_fraction * (1ll << 31);
+    printf("dw7_multiplier = %f = %d * 2^%d\n", dw7_multiplier, dw7_fraction_int32, dw7_exponent);
+
+    int32_t dw7_output_32[dw7_output_size][dw7_output_size][dw7_weights_channels];
+
+    printf("First element of dw7_weights: %d\n", dw7_weights[0][0][0][0]);
+    printf("Second element of dw7_weights: %d\n", dw7_weights[0][0][0][1]);
 
     //Determine the padded conv2d_7_output size
     static const int conv2d_7_output_padded_size = 29;
@@ -2474,65 +2612,176 @@ void dw7(){
     for(int k = 0; k < dw7_weights_channels; k++){
         for(int i = 0; i < dw7_output_size; i++){
             for(int j = 0; j < dw7_output_size; j++){
-                dw7_output[i][j][k] = 0;
+                dw7_output_32[i][j][k] = 0;
                 for(int l = 0; l < dw7_weights_size; l++){
                     for(int m = 0; m < dw7_weights_size; m++){
-                        dw7_output[i][j][k] += conv2d_7_output_padded[i*dw7_weights_stride + l][j*dw7_weights_stride + m][k] * dw7_weights[l][m][k][k];
+                        dw7_output_32[i][j][k] += conv2d_7_output_padded[i*dw7_weights_stride + l][j*dw7_weights_stride + m][k] * dw7_weights[l][m][k][0];
                     }
                 }
-                dw7_output[i][j][k] += dw7_biases[k];
+                dw7_output_32[i][j][k] += dw7_biases[k];
+
+                dw7_output_32[i][j][k] = fixed_point_multipilier(dw7_output_32[i][j][k], dw7_fraction_int32, dw7_exponent);
+
+                // Cast to uint8_t
+                dw7_output[i][j][k] = (uint8_t)dw7_output_32[i][j][k];
+
+                // Add zero point 
+                dw7_output[i][j][k] = dw7_output[i][j][k] - dw7_output_zero_point;
+
+                // Saturate
+                if (dw7_output[i][j][k] < 0) {
+                    dw7_output[i][j][k] = 0;
+                } else if (dw7_output[i][j][k] > 255) {
+                    dw7_output[i][j][k] = 255;
+                }
+
             }
         }
     }
+
+    printf("First element of dw7_output_32: %d\n", dw7_output_32[0][0][0]);
+    printf("Second element of dw7_output_32: %d\n", dw7_output_32[1][0][0]);
     printf("First element of dw7_output: %d\n", dw7_output[0][0][0]);
-    printf("Size of dw7_output: %d x %d x %d \n", LEN(dw7_output), LEN(dw7_output[0]), LEN(dw7_output[0][0]));
+    printf("Second element of dw7_output: %d\n", dw7_output[1][0][0]);
+    printf("Size of dw7_output: %d x %d x %d \n\n", LEN(dw7_output), LEN(dw7_output[0]), LEN(dw7_output[0][0]));
 }
 
 void pw7(){
+
+    // Calculate the normalized pw7_multiplier
+    const float pw7_multiplier = dw7_output_scale * pw7_weights_scale / pw7_output_scale;
+
+    // Normalized fraction and exponent the pw5_multiplier
+    float pw7_fraction;
+    int pw7_exponent;
+    frexp_function(pw7_multiplier, &pw7_fraction, &pw7_exponent);
+    int pw7_fraction_int32 = pw7_fraction * (1ll << 31);
+    printf("pw7_multiplier = %f = %d * 2^%d\n", pw7_multiplier, pw7_fraction_int32, pw7_exponent);
+
+    int32_t pw7_output_32[dw6_output_size][dw6_output_size][pw7_weights_num];
+
+    printf("Size of pw7_output_32: %d x %d x %d \n", LEN(pw7_output_32), LEN(pw7_output_32[0]), LEN(pw7_output_32[0][0]));
 
     //Perform pw7
     for(int k = 0; k < pw7_weights_num; k++){
         for(int i = 0; i < pw7_output_size; i++){
             for(int j = 0; j < pw7_output_size; j++){
-                pw7_output[i][j][k] = 0;
+                pw7_output_32[i][j][k] = 0;
                 for(int l = 0; l < pw7_weights_channels; l++){
                     for(int m = 0; m < pw7_weights_size; m++){
                         for(int n = 0; n < pw7_weights_size; n++){
-                            pw7_output[i][j][k] += dw7_output[i][j][l] * pw7_weights[m][n][l][k];
+                            pw7_output_32[i][j][k] += dw7_output[i][j][l] * pw7_weights[m][n][l][k];
                         }
                     }
                 }
-                pw7_output[i][j][k] += pw7_biases[k];
+                pw7_output_32[i][j][k] += pw7_biases[k];
+
+                pw7_output_32[i][j][k] = fixed_point_multipilier(pw7_output_32[i][j][k], pw7_fraction_int32, pw7_exponent);
+
+                // Cast to uint8_t
+                pw7_output[i][j][k] = (uint8_t)pw7_output_32[i][j][k];
+
+                // Add zero point
+                pw7_output[i][j][k] = pw7_output[i][j][k] - pw7_output_zero_point;
+
+                // Saturate
+                if (pw7_output[i][j][k] < 0) {
+                    pw7_output[i][j][k] = 0;
+                } else if (pw7_output[i][j][k] > 255) {
+                    pw7_output[i][j][k] = 255;
+                }
             }
         }
     }
+
+    printf("First element of pw7_output_32: %d\n", pw7_output_32[0][0][0]);
+    printf("Second element of pw7_output_32: %d\n", pw7_output_32[1][0][0]);
     printf("First element of pw7_output: %d\n", pw7_output[0][0][0]);
-    printf("Size of pw7_output: %d x %d x %d \n", LEN(pw7_output), LEN(pw7_output[0]), LEN(pw7_output[0][0]));
+    printf("Second element of pw7_output: %d\n", pw7_output[1][0][0]);
+    printf("Size of pw7_output: %d x %d x %d \n\n", LEN(pw7_output), LEN(pw7_output[0]), LEN(pw7_output[0][0]));
 }
 
 void conv2d_8(){
+
+    // Calculate the normalized conv2d_8_multiplier
+    const float conv2d_8_multiplier = conv2d_8_weights_scale * pw7_output_scale / conv2d_8_output_scale;
+
+    // Normalized fraction and exponent the conv2d_8_multiplier
+    float conv2d_8_fraction;
+    int conv2d_8_exponent;
+    frexp_function(conv2d_8_multiplier, &conv2d_8_fraction, &conv2d_8_exponent);
+    int conv2d_8_fraction_int32 = conv2d_8_fraction * (1ll << 31);
+    printf("conv2d_8_multiplier = %f = %d * 2^%d\n", conv2d_8_multiplier, conv2d_8_fraction_int32, conv2d_8_exponent);
+
+    int32_t conv2d_8_output_32[conv2d_8_output_size][conv2d_8_output_size][conv2d_8_weights_num];
+
+    printf("First element of conv2d_8_weights: %d\n", conv2d_8_weights[0][0][0][0]);
+    printf("Second element of conv2d_8_weights: %d\n", conv2d_8_weights[0][0][0][1]);
 
     //Perform conv2d_8
     for(int k = 0; k < conv2d_8_weights_num; k++){
         for(int i = 0; i < conv2d_8_output_size; i++){
             for(int j = 0; j < conv2d_8_output_size; j++){
-                conv2d_8_output[i][j][k] = 0;
+                conv2d_8_output_32[i][j][k] = 0;
                 for(int l = 0; l < conv2d_8_weights_channels; l++){
                     for(int m = 0; m < conv2d_8_weights_size; m++){
                         for(int n = 0; n < conv2d_8_weights_size; n++){
-                            conv2d_8_output[i][j][k] += pw7_output[i][j][l] * conv2d_8_weights[m][n][l][k];
+                            conv2d_8_output_32[i][j][k] += pw7_output[i][j][l] * conv2d_8_weights[m][n][l][k];
                         }
                     }
                 }
-                conv2d_8_output[i][j][k] += conv2d_8_biases[k];
+                conv2d_8_output_32[i][j][k] += conv2d_8_biases[k];
+
+                conv2d_8_output_32[i][j][k] = fixed_point_multipilier(conv2d_8_output_32[i][j][k], conv2d_8_fraction_int32, conv2d_8_exponent);
+
+                // Cast to uint8_t
+                conv2d_8_output[i][j][k] = (uint8_t)conv2d_8_output_32[i][j][k];
+
+                // Add zero point
+                conv2d_8_output[i][j][k] = conv2d_8_output[i][j][k] - conv2d_8_output_zero_point;
+
+                // Saturate
+                if (conv2d_8_output[i][j][k] < 0) {
+                    conv2d_8_output[i][j][k] = 0;
+                } else if (conv2d_8_output[i][j][k] > 255) {
+                    conv2d_8_output[i][j][k] = 255;
+                }
             }
         }
     }
+
+    printf("First element of conv2d_8_output_32: %d\n", conv2d_8_output_32[0][0][0]);
+    printf("Second element of conv2d_8_output_32: %d\n", conv2d_8_output_32[1][0][0]);
     printf("First element of conv2d_8_output: %d\n", conv2d_8_output[0][0][0]);
-    printf("Size of conv2d_8_output: %d x %d x %d \n", LEN(conv2d_8_output), LEN(conv2d_8_output[0]), LEN(conv2d_8_output[0][0]));
+    printf("Second element of conv2d_8_output: %d\n", conv2d_8_output[1][0][0]);
+    printf("Size of conv2d_8_output: %d x %d x %d \n\n", LEN(conv2d_8_output), LEN(conv2d_8_output[0]), LEN(conv2d_8_output[0][0]));
 }
 
 void dw8(){
+
+    // Calculate the normalized dw8_multiplier
+    const float dw8_multiplier = conv2d_8_output_scale * dw8_weights_scale / dw8_output_scale;
+
+    // Normalized fraction and exponent the dw8_multiplier
+    float dw8_fraction;
+    int dw8_exponent;
+    frexp_function(dw8_multiplier, &dw8_fraction, &dw8_exponent);
+    int dw8_fraction_int32 = dw8_fraction * (1ll << 31);
+    printf("dw8_multiplier = %f = %d * 2^%d\n", dw8_multiplier, dw8_fraction_int32, dw8_exponent);
+
+    int32_t dw8_output_32[dw8_output_size][dw8_output_size][dw8_weights_channels];
+
+    // Initialize dw8_output_32 with 0 values
+    for(int i = 0; i < dw8_output_size; i++){
+        for(int j = 0; j < dw8_output_size; j++){
+            for(int k = 0; k < dw8_weights_channels; k++){
+                dw8_output_32[i][j][k] = 0;
+            }
+        }
+    }
+
+    printf("First element of dw8_weights: %d\n", dw8_weights[0][0][0][0]);
+    printf("Second element of dw8_weights: %d\n", dw8_weights[0][0][0][1]);
 
     //Determine the padded conv2d_8_output size 
     static const int conv2d_8_padded_output_size = 16;
@@ -2556,48 +2805,98 @@ void dw8(){
         }
     }
     printf("First element of conv2d_8_padded_output: %d\n", conv2d_8_padded_output[0][0][0]);
+    printf("Second element of conv2d_8_padded_output: %d\n", conv2d_8_padded_output[1][0][0]);
     printf("Size of conv2d_8_padded_output: %d x %d x %d \n", LEN(conv2d_8_padded_output), LEN(conv2d_8_padded_output[0]), LEN(conv2d_8_padded_output[0][0]));
     
     //Perform dw8
     for(int k = 0; k < dw8_weights_num; k++){
         for(int i = 0; i < dw8_output_size; i++){
             for(int j = 0; j < dw8_output_size; j++){
-                dw8_output[i][j][k] = 0;
                 for(int l = 0; l < dw8_weights_channels; l++){
                     for(int m = 0; m < dw8_weights_size; m++){
                         for(int n = 0; n < dw8_weights_size; n++){
-                            dw8_output[i][j][l] += conv2d_8_padded_output[i + m][j + n][l] * dw8_weights[m][n][l][k];
+                            dw8_output_32[i][j][l] += conv2d_8_padded_output[i + m][j + n][l] * dw8_weights[m][n][l][k];
                         }
                     }
-                    dw8_output[i][j][k] += dw8_biases[l];
+                    dw8_output_32[i][j][l] += dw8_biases[l];
+
+                    dw8_output_32[i][j][l] = fixed_point_multipilier(dw8_output_32[i][j][l], dw8_fraction_int32, dw8_exponent);
+
+                    // Cast to uint8_t
+                    dw8_output[i][j][l] = (uint8_t)dw8_output_32[i][j][l];
+
+                    // Add zero point 
+                    dw8_output[i][j][l] = dw8_output[i][j][l] - dw8_output_zero_point;
+
+                    // Saturate
+                    if (dw8_output[i][j][l] < 0) {
+                        dw8_output[i][j][l] = 0;
+                    } else if (dw8_output[i][j][l] > 255) {
+                        dw8_output[i][j][l] = 255;
+                    }
                 }
             }
         }
     }
+    printf("First element of dw8_output_32: %d\n", dw8_output_32[0][0][0]);
+    printf("Second element of dw8_output_32: %d\n", dw8_output_32[1][0][0]);
     printf("First element of dw8_output: %d\n", dw8_output[0][0][0]);
-    printf("Size of dw8_output: %d x %d x %d \n", LEN(dw8_output), LEN(dw8_output[0]), LEN(dw8_output[0][0]));
+    printf("Second element of dw8_output: %d\n", dw8_output[1][0][0]);
+    printf("Size of dw8_output: %d x %d x %d \n\n", LEN(dw8_output), LEN(dw8_output[0]), LEN(dw8_output[0][0]));
 }
 
 void pw8(){
+
+    // Calculate the normalized pw8_multiplier
+    const float pw8_multiplier = dw8_output_scale * pw8_weights_scale / pw8_output_scale;
+
+    // Normalized fraction and exponent the pw5_multiplier
+    float pw8_fraction;
+    int pw8_exponent;
+    frexp_function(pw8_multiplier, &pw8_fraction, &pw8_exponent);
+    int pw8_fraction_int32 = pw8_fraction * (1ll << 31);
+    printf("pw8_multiplier = %f = %d * 2^%d\n", pw8_multiplier, pw8_fraction_int32, pw8_exponent);
+
+    int32_t pw8_output_32[dw6_output_size][dw6_output_size][pw8_weights_num];
+
+    printf("Size of pw8_output_32: %d x %d x %d \n", LEN(pw8_output_32), LEN(pw8_output_32[0]), LEN(pw8_output_32[0][0]));
 
     //Perform pw8
     for(int k = 0; k < pw8_weights_num; k++){
         for(int i = 0; i < pw8_output_size; i++){
             for(int j = 0; j < pw8_output_size; j++){
-                pw8_output[i][j][k] = 0;
+                pw8_output_32[i][j][k] = 0;
                 for(int l = 0; l < pw8_weights_channels; l++){
                     for(int m = 0; m < pw8_weights_size; m++){
                         for(int n = 0; n < pw8_weights_size; n++){
-                            pw8_output[i][j][k] += dw8_output[i + m][j + n][l] * pw8_weights[m][n][l][k];
+                            pw8_output_32[i][j][k] += dw8_output[i + m][j + n][l] * pw8_weights[m][n][l][k];
                         }
                     }
-                    pw8_output[i][j][k] += pw8_biases[k];
+                    pw8_output_32[i][j][k] += pw8_biases[k];
+
+                    pw8_output_32[i][j][k] = fixed_point_multipilier(pw8_output_32[i][j][k], pw8_fraction_int32, pw8_exponent);
+
+                    // Cast to uint8_t
+                    pw8_output[i][j][k] = (uint8_t)pw8_output_32[i][j][k];
+
+                    // Add zero point
+                    pw8_output[i][j][k] = pw8_output[i][j][k] - pw8_output_zero_point;
+
+                    // Saturate
+                    if (pw8_output[i][j][k] < 0) {
+                        pw8_output[i][j][k] = 0;
+                    } else if (pw8_output[i][j][k] > 255) {
+                        pw8_output[i][j][k] = 255;
+                    }
                 }
             }
         }
     }
+    printf("First element of pw8_output_32: %d\n", pw8_output_32[0][0][0]);
+    printf("Second element of pw8_output_32: %d\n", pw8_output_32[1][0][0]);
     printf("First element of pw8_output: %d\n", pw8_output[0][0][0]);
-    printf("Size of pw8_output: %d x %d x %d \n", LEN(pw8_output), LEN(pw8_output[0]), LEN(pw8_output[0][0]));
+    printf("Second element of pw8_output: %d\n", pw8_output[1][0][0]);
+    printf("Size of pw8_output: %d x %d x %d \n\n", LEN(pw8_output), LEN(pw8_output[0]), LEN(pw8_output[0][0]));
 }
 
 void add_5(){
@@ -3445,14 +3744,14 @@ int main (){
     conv2d_6();
     dw6();
     pw6();
-    // add_4();
-    // conv2d_7();
-    // dw7();
-    // pw7();
-    // //Added start
-    // conv2d_8();
-    // dw8();
-    // pw8();
+    add_4();
+    conv2d_7();
+    dw7();
+    pw7();
+    //Added start
+    conv2d_8();
+    dw8();
+    pw8();
     // //Added stop
     // add_5();
     // conv2d_9();
